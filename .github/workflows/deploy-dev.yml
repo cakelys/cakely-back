@@ -21,7 +21,7 @@ jobs:
       - run: npm ci
       - name: Create .env file
         run: |
-          echo "MONGODB_URI=${{ secrets.DEV_MONGODB_URI }}" >> .env
+          echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" >> .env
           echo "MONGODB_DBNAME=${{ secrets.MONGODB_DBNAME_DEV }}" >> .env
       - name: serverless deploy
         uses: serverless/github-action@v3.2
