@@ -1,0 +1,146 @@
+import { Injectable } from '@nestjs/common';
+import { CreateCakeLikeDto } from './dto/create-cake-like.dto';
+import { CreateStoreLikeDto } from './dto/create-store-like.dto';
+import { Model } from 'mongoose';
+import { StoreLike } from './entities/storeLike.entity';
+import { InjectModel } from '@nestjs/mongoose';
+import { CakeLike } from './entities/cakeLike.entity';
+import { ObjectId } from 'mongodb';
+
+@Injectable()
+export class LikesService {
+  constructor(
+    @InjectModel(StoreLike.name)
+    private readonly StoreLikeModel: Model<StoreLike>,
+    @InjectModel(CakeLike.name) private readonly CakeLikeModel: Model<CakeLike>,
+  ) {}
+
+  // 전체 찜 케이크 리스트 가져오기
+  async getAllCakeLikes() {
+    const userId = new ObjectId('665f134a0dfff9c6393100d5');
+    const allCakeLikes = await this.CakeLikeModel.aggregate([
+      {
+        $match: {
+          userId: userId,
+        },
+      },
+      {
+        $lookup: {
+          from: 'cakes',
+          localField: 'cakeId',
+          foreignField: '_id',
+          as: 'cake',
+        },
+      },
+      {
+        $unwind: {
+          path: '$cake',
+          // preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          _id: '$cake._id',
+          // photos: '$cake.photos',
+          photo: { $arrayElemAt: ['$cake.photos', 0] },
+          tags: '$cake.tags',
+          categories: '$cake.categories',
+          popularity: '$cake.popularity',
+          createdDate: '$cake.createdDate',
+        },
+      },
+      {
+        $addFields: {
+          isFavorite: true,
+        },
+      },
+    ]);
+
+    return allCakeLikes;
+  }
+
+  // 전체 찜 가게 리스트 가져오기
+  async getAllStoreLikes() {
+    const userId = new ObjectId('665f134a0dfff9c6393100d5');
+    const allStoreLikes = await this.StoreLikeModel.aggregate([
+      {
+        $match: {
+          userId: userId,
+        },
+      },
+      {
+        $lookup: {
+          from: 'stores',
+          localField: 'storeId',
+          foreignField: '_id',
+          as: 'store',
+        },
+      },
+      {
+        $unwind: {
+          path: '$store',
+          // preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          _id: '$store._id',
+          name: '$store.name',
+          address: '$store.address',
+          latitude: '$store.latitude',
+          longitude: '$store.longitude',
+          logo: '$store.logo',
+          info: '$store.info',
+          description: '$store.description',
+          siteUrl: '$store.siteUrl',
+          sizes: '$store.sizes',
+          shapes: '$store.shapes',
+          popularity: '$store.popularity',
+        },
+      },
+      {
+        $addFields: {
+          isFavorite: true,
+        },
+      },
+    ]);
+
+    return allStoreLikes;
+  }
+
+  // 찜 케이크 추가 -> 테스트 x
+  async createCakeLike(createCakeLikeDto: CreateCakeLikeDto) {
+    const userId = new ObjectId('665f134a0dfff9c6393100d5');
+    createCakeLikeDto.userId = userId;
+    const newLike = new this.CakeLikeModel(createCakeLikeDto);
+    return newLike.save();
+  }
+
+  // 찜 가게 추가 -> 테스트 x
+  async createStoreLike(createStoreLikeDto: CreateStoreLikeDto) {
+    const userId = new ObjectId('665f134a0dfff9c6393100d5');
+    createStoreLikeDto.userId = userId;
+    const newLike = new this.StoreLikeModel(createStoreLikeDto);
+    return newLike.save();
+  }
+
+  // 찜 케이크 삭제 -> not tested
+  async deleteCakeLike(id: string): Promise<any> {
+    const userId = new ObjectId('665f134a0dfff9c6393100d5');
+    const deletedLike = await this.CakeLikeModel.deleteOne({
+      userId: userId,
+      cakeId: id,
+    });
+
+    return deletedLike;
+  }
+
+  // 찜 가게 삭제 -> not tested
+  async deleteStoreLike(id: string): Promise<any> {
+    const userId = new ObjectId('665f134a0dfff9c6393100d5');
+    return this.StoreLikeModel.deleteOne({
+      userId: userId,
+      storeId: id,
+    });
+  }
+}
