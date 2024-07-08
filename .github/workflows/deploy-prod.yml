@@ -23,6 +23,8 @@ jobs:
         run: |
           echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" >> .env
           echo "MONGODB_DBNAME=${{ secrets.MONGODB_DBNAME_PROD }}" >> .env
+      - name: Display .env file
+        run: cat .env
       - name: serverless deploy
         uses: serverless/github-action@v3.2
         with:
