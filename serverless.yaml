@@ -10,6 +10,7 @@ provider:
   name: aws
   runtime: nodejs18.x
   region: ap-northeast-2
+  stage: ${opt:stage, 'dev'}
 
 package:
   exclude:
