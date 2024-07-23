@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { CakesService } from './cakes.service';
 import { CreateCakeDto } from './dto/create-cake.dto';
@@ -30,8 +31,25 @@ export class CakesController {
 
   // 오늘의 케이크 리스트 가져오기
   @Get('today')
-  getTodayCakes() {
-    return this.cakesService.getTodayCakes();
+  getTodayCakes(
+    @Query('latitude') latitude: string,
+    @Query('longitude') longitude: string,
+  ) {
+    // let을 const로 임시 변경해둔 상태
+    let userLatitude = parseFloat(latitude);
+    let userLongitude = parseFloat(longitude);
+
+    // 위치 값이 유효한지 검사
+    if (isNaN(userLatitude) || isNaN(userLongitude)) {
+      // 테스트용 임시값
+      console.log('임시값', userLatitude, userLongitude);
+      userLatitude = 37.5665;
+      userLongitude = 126.978;
+
+      //throw new BadRequestException('Invalid latitude or longitude');
+    }
+
+    return this.cakesService.getTodayCakes(userLatitude, userLongitude);
   }
 
   // 카테고리별 케이크 리스트 가져오기

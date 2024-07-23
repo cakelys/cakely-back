@@ -6,10 +6,13 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { ObjectId } from 'mongodb';
 import { create } from 'domain';
+import { CakesRepository } from './cakes.repository';
+import { calculateDistance } from './utils/distance.utils';
 
 @Injectable()
 export class CakesService {
   constructor(
+    private readonly cakesRepository: CakesRepository,
     @InjectModel(Cake.name) private readonly CakeModel: Model<Cake>,
   ) {}
 
@@ -102,97 +105,17 @@ export class CakesService {
     return randomCakes;
   }
 
-  async getTodayCakes() {
+  async getTodayCakes(userLatitude: number, userLongitude: number) {
     // 최신 순으로 정렬해서 최근 5개 케이크와 해당 케이크 마켓의 정보를 가져온다.
-    const todayCakes = await this.CakeModel.aggregate([
-      {
-        $lookup: {
-          from: 'cakeLikes',
-          localField: '_id',
-          foreignField: 'cakeId',
-          as: 'likes',
-        },
-      },
-      {
-        $unwind: {
-          path: '$likes',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $lookup: {
-          from: 'stores',
-          localField: 'storeId',
-          foreignField: '_id',
-          as: 'store',
-        },
-      },
-      {
-        $unwind: {
-          path: '$store',
-        },
-      },
-      {
-        $lookup: {
-          from: 'storeLikes',
-          localField: 'store._id',
-          foreignField: 'storeId',
-          as: 'result',
-        },
-      },
-      {
-        $unwind: {
-          path: '$result',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $project: {
-          _id: 1,
-          photo: { $arrayElemAt: ['$photos', 0] },
-          // photos: 1,
-          // isFavorite: 1,
-          isFavorite: {
-            $cond: {
-              if: {
-                $eq: [
-                  '$likes.userId',
-                  new ObjectId('665f134a0dfff9c6393100d5'),
-                ],
-              },
-              then: true,
-              else: false,
-            },
-          },
-          tags: 1,
-          categories: 1,
-          popularity: 1,
-          createdDate: 1,
-          isFavoriteStore: {
-            $cond: {
-              if: {
-                $eq: [
-                  '$result.userId',
-                  new ObjectId('665f134a0dfff9c6393100d5'),
-                ],
-              },
-              then: true,
-              else: false,
-            },
-          },
-          store: 1,
-        },
-      },
-      {
-        $sort: {
-          createdDate: -1,
-        },
-      },
-      {
-        $limit: 5,
-      },
-    ]);
-    return todayCakes;
+    const todayCakes = await this.cakesRepository.getTodayCakesData();
+
+    const todayCakesWithDistance = this.addDistanceToCakes(
+      todayCakes,
+      userLatitude,
+      userLongitude,
+    );
+
+    return todayCakesWithDistance;
   }
 
   async getCategoryCakes(category: string) {
@@ -308,5 +231,23 @@ export class CakesService {
       },
     ]);
     return cake;
+  }
+  private addDistanceToCakes(
+    cakes: any[],
+    userLat: number,
+    userLon: number,
+  ): any[] {
+    cakes.forEach((cake) => {
+      const storeLat = cake.store.latitude;
+      const storeLon = cake.store.longitude;
+      const distance = calculateDistance(userLat, userLon, storeLat, storeLon);
+      cake.store.distance = distance;
+
+      // latitude, longitude 정보 제거
+      delete cake.store.latitude;
+      delete cake.store.longitude;
+    });
+
+    return cakes;
   }
 }
