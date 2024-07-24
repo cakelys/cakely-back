@@ -105,17 +105,11 @@ export class CakesService {
     return randomCakes;
   }
 
-  async getTodayCakes(userLatitude: number, userLongitude: number) {
+  async getTodayCakes() {
     // 최신 순으로 정렬해서 최근 5개 케이크와 해당 케이크 마켓의 정보를 가져온다.
     const todayCakes = await this.cakesRepository.getTodayCakesData();
 
-    const todayCakesWithDistance = this.addDistanceToCakes(
-      todayCakes,
-      userLatitude,
-      userLongitude,
-    );
-
-    return todayCakesWithDistance;
+    return todayCakes;
   }
 
   async getCategoryCakes(category: string) {
@@ -232,6 +226,8 @@ export class CakesService {
     ]);
     return cake;
   }
+
+  // 거리 계산
   private addDistanceToCakes(
     cakes: any[],
     userLat: number,

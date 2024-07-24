@@ -82,8 +82,6 @@ export class CakesRepository {
           'store._id': 1,
           'store.name': 1,
           'store.logo': 1,
-          'store.latitude': 1,
-          'store.longitude': 1,
           'store.address': 1,
         },
       },
