@@ -8,7 +8,7 @@ export class CakesRepository {
   constructor(@InjectModel('Cake') private readonly cakeModel: Model<any>) {}
 
   // 오늘의 케이크 데이터를 가져오는 함수
-  async getTodayCakesData(): Promise<any[]> {
+  async getTodayCakesData(uid: string): Promise<any[]> {
     return this.cakeModel.aggregate([
       {
         $lookup: {

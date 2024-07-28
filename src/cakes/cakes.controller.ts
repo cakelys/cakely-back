@@ -32,7 +32,8 @@ export class CakesController {
   // 오늘의 케이크 리스트 가져오기
   @Get('today')
   getTodayCakes() {
-    return this.cakesService.getTodayCakes();
+    const uid = '665f134a0dfff9c6393100d5';
+    return this.cakesService.getTodayCakes(uid);
   }
 
   // 카테고리별 케이크 리스트 가져오기

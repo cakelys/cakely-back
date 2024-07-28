@@ -105,9 +105,9 @@ export class CakesService {
     return randomCakes;
   }
 
-  async getTodayCakes() {
+  async getTodayCakes(uid: string) {
     // 최신 순으로 정렬해서 최근 5개 케이크와 해당 케이크 마켓의 정보를 가져온다.
-    const todayCakes = await this.cakesRepository.getTodayCakesData();
+    const todayCakes = await this.cakesRepository.getTodayCakesData(uid);
 
     return todayCakes;
   }
