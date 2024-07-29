@@ -1,59 +1,35 @@
 import { Injectable } from '@nestjs/common';
-import { CreateStoreDto } from './dto/create-store.dto';
-import { UpdateStoreDto } from './dto/update-store.dto';
 import { Model } from 'mongoose';
 import { Store } from './entities/store.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { ObjectId } from 'mongodb';
+import { setSortCriteria } from 'src/utils/validation-utils';
+import { StoresRepository } from './stores.repository';
 
 @Injectable()
 export class StoresService {
   constructor(
+    private readonly storesRepository: StoresRepository,
     @InjectModel(Store.name) private readonly StoreModel: Model<Store>,
   ) {}
 
   // 전체 store 리스트 가져오기
-  async getAllStores() {
-    const userId = new ObjectId('665f134a0dfff9c6393100d5');
-    const allStores = await this.StoreModel.aggregate([
-      {
-        $lookup: {
-          from: 'storeLikes',
-          localField: '_id',
-          foreignField: 'storeId',
-          as: 'result',
-        },
-      },
-      {
-        $unwind: {
-          path: '$result',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $project: {
-          _id: 1,
-          name: 1,
-          address: 1,
-          latitude: 1,
-          longitude: 1,
-          logo: 1,
-          info: 1,
-          description: 1,
-          siteUrl: 1,
-          sizes: 1,
-          shapes: 1,
-          popularity: 1,
-          isFavorite: {
-            $cond: {
-              if: { $eq: ['$result.userId', userId] },
-              then: true,
-              else: false,
-            },
-          },
-        },
-      },
-    ]);
+  async getAllStores(
+    uid: string,
+    sortBy: string,
+    userLatitude?: string,
+    userLongitude?: string,
+  ) {
+    const sortCriteria = setSortCriteria(sortBy);
+    const userLatitudeNumber = parseFloat(userLatitude);
+    const userLongitudeNumber = parseFloat(userLongitude);
+
+    const allStores = await this.storesRepository.getAllStores(
+      uid,
+      sortCriteria,
+      userLatitudeNumber,
+      userLongitudeNumber,
+    );
     return allStores;
   }
 

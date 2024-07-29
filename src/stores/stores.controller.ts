@@ -1,15 +1,10 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { StoresService } from './stores.service';
-import { CreateStoreDto } from './dto/create-store.dto';
-import { UpdateStoreDto } from './dto/update-store.dto';
+import {
+  setDefaultSort,
+  validateCoordinates,
+  validateSortBy,
+} from 'src/utils/validation-utils';
 
 @Controller('stores')
 export class StoresController {
@@ -17,8 +12,25 @@ export class StoresController {
 
   // 전체 store 리스트 가져오기
   @Get()
-  getAllStores() {
-    return this.storesService.getAllStores();
+  getAllStores(
+    @Query('sortBy') sortBy: string,
+    @Query('latitude') latitude: string,
+    @Query('longitude') longitude: string,
+  ) {
+    const uid = '665f134a0dfff9c6393100d5';
+    const defaultSortBy = setDefaultSort(sortBy);
+    validateSortBy(defaultSortBy);
+    if (defaultSortBy === 'distance') {
+      validateCoordinates(latitude, longitude);
+      return this.storesService.getAllStores(
+        uid,
+        defaultSortBy,
+        latitude,
+        longitude,
+      );
+    }
+
+    return this.storesService.getAllStores(uid, defaultSortBy);
   }
 
   // 하나 store 가져오기
