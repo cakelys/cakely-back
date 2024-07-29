@@ -1,32 +1,38 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Query,
-  BadRequestException,
-} from '@nestjs/common';
+import { Controller, Get, Param, Query, Logger } from '@nestjs/common';
 import { CakesService } from './cakes.service';
-import { CreateCakeDto } from './dto/create-cake.dto';
-import { UpdateCakeDto } from './dto/update-cake.dto';
+import {
+  setDefaultSort,
+  validateCoordinates,
+  validateRequiredField,
+  validateSortBy,
+} from 'src/utils/validation-utils';
 
 @Controller('cakes')
 export class CakesController {
+  private readonly logger = new Logger(CakesController.name);
   constructor(private readonly cakesService: CakesService) {}
-
-  // 전체 케이크 리스트 가져오기
-  @Get()
-  getAllCakes() {
-    return this.cakesService.getAllCakes();
-  }
 
   // 추천케이크 리스트 가져오기
   @Get('recommend')
-  getRecommendCakes() {
-    return this.cakesService.getRecommendCakes();
+  getRecommendCakes(
+    @Query('sortBy') sortBy: string,
+    @Query('latitude') latitude: string,
+    @Query('longitude') longitude: string,
+  ) {
+    const uid = '665f134a0dfff9c6393100d5';
+
+    const defaultSortBy = setDefaultSort(sortBy);
+    validateSortBy(defaultSortBy);
+    if (defaultSortBy === 'distance') {
+      validateCoordinates(latitude, longitude);
+      return this.cakesService.getRecommendCakes(
+        uid,
+        defaultSortBy,
+        latitude,
+        longitude,
+      );
+    }
+    return this.cakesService.getRecommendCakes(uid, defaultSortBy);
   }
 
   // 오늘의 케이크 리스트 가져오기
@@ -37,19 +43,43 @@ export class CakesController {
   }
 
   // 카테고리별 케이크 리스트 가져오기
-  @Get('category')
-  getCategoryCakes(@Query('category') category: string) {
-    // category 있는지 확인
-    if (!category) {
-      throw new Error('category is required');
+  @Get()
+  getCategoryCakes(
+    @Query('category') category: string,
+    @Query('sortBy') sortBy: string,
+    @Query('latitude') latitude: string,
+    @Query('longitude') longitude: string,
+  ) {
+    const uid = '665f134a0dfff9c6393100d5';
+
+    const defaultSortBy = setDefaultSort(sortBy);
+    validateSortBy(defaultSortBy);
+    validateRequiredField('category', category);
+    if (defaultSortBy === 'distance') {
+      validateCoordinates(latitude, longitude);
+      return this.cakesService.getCategoryCakes(
+        uid,
+        category,
+        defaultSortBy,
+        latitude,
+        longitude,
+      );
     }
-    const categoryCakes = this.cakesService.getCategoryCakes(category);
-    return categoryCakes;
+    return this.cakesService.getCategoryCakes(uid, category, defaultSortBy);
   }
 
   // 케이크 상세정보 가져오기
-  @Get(':id')
-  getCake(@Param('id') id: string) {
-    return this.cakesService.getCake(id);
+  @Get(':cakeId')
+  getCakeById(
+    @Param('cakeId') cakeId: string,
+    @Query('latitude') latitude: string,
+    @Query('longitude') longitude: string,
+  ) {
+    const uid = '665f134a0dfff9c6393100d5';
+
+    if (latitude && longitude) {
+      return this.cakesService.getCakeById(uid, cakeId, latitude, longitude);
+    }
+    return this.cakesService.getCakeById(uid, cakeId);
   }
 }
