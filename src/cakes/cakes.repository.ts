@@ -53,18 +53,21 @@ export class CakesRepository {
       },
       {
         $project: {
-          _id: 1,
-          photo: { $arrayElemAt: ['$photos', 0] },
-          isFavorite: {
-            $cond: {
-              if: {
-                $eq: ['$likes.userId', new ObjectId(uid)],
+          _id: 0,
+          cake: {
+            id: '$_id',
+            photo: { $arrayElemAt: ['$photos', 0] },
+            isLiked: {
+              $cond: {
+                if: {
+                  $eq: ['$likes.userId', new ObjectId(uid)],
+                },
+                then: true,
+                else: false,
               },
-              then: true,
-              else: false,
             },
           },
-          'store.isFavorite': {
+          'store.isLiked': {
             $cond: {
               if: {
                 $eq: ['$result.userId', new ObjectId(uid)],
@@ -73,7 +76,7 @@ export class CakesRepository {
               else: false,
             },
           },
-          'store._id': 1,
+          'store.id': '$store._id',
           'store.name': 1,
           'store.logo': 1,
           'store.address': 1,
