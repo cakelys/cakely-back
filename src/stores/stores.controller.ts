@@ -3,6 +3,7 @@ import { StoresService } from './stores.service';
 import {
   setDefaultSort,
   validateCoordinates,
+  validateRequiredField,
   validateSortBy,
 } from 'src/utils/validation-utils';
 
@@ -16,21 +17,24 @@ export class StoresController {
     @Query('sortBy') sortBy: string,
     @Query('latitude') latitude: string,
     @Query('longitude') longitude: string,
+    @Query('page') page: string,
   ) {
     const uid = '665f134a0dfff9c6393100d5';
     const defaultSortBy = setDefaultSort(sortBy);
     validateSortBy(defaultSortBy);
+    validateRequiredField('page', page);
     if (defaultSortBy === 'distance') {
       validateCoordinates(latitude, longitude);
       return this.storesService.getAllStores(
         uid,
         defaultSortBy,
+        page,
         latitude,
         longitude,
       );
     }
 
-    return this.storesService.getAllStores(uid, defaultSortBy);
+    return this.storesService.getAllStores(uid, defaultSortBy, page);
   }
 
   // 하나 store 가져오기

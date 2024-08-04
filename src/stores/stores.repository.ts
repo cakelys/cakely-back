@@ -8,10 +8,14 @@ export class StoresRepository {
 
   async getAllStores(
     uid: string,
-    sortCriteria: any,
+    sortCriteria: string,
     userLatitude: number,
     userLongitude: number,
+    page: number,
   ): Promise<any[]> {
+    const pageSize = 10; // 한 페이지에 표시할 항목 수
+    const skip = (page - 1) * pageSize; // 페이지 번호에 따라 스킵할 항목 수 계산
+
     return this.storeModel.aggregate([
       // 스토어의 좋아요 정보 가져오기
       {
@@ -83,8 +87,10 @@ export class StoresRepository {
             address: '$address',
             logo: '$logo',
             distance: '$distance',
+            popularity: '$popularity',
+            createdDate: '$createdDate',
           },
-          isFavorite: {
+          isLiked: {
             $first: {
               $cond: {
                 if: { $eq: ['$storeLikes.userId', uid] },
@@ -95,9 +101,9 @@ export class StoresRepository {
           },
           popularCakes: {
             $push: {
-              _id: '$cakes._id',
+              id: '$cakes._id',
               photo: { $arrayElemAt: ['$cakes.photos', 0] },
-              isFavorite: {
+              isLiked: {
                 $cond: {
                   if: {
                     $in: [uid, '$cakeLikes.userId'],
@@ -127,20 +133,27 @@ export class StoresRepository {
       },
       {
         $project: {
-          _id: '$_id.storeId',
-          name: '$_id.name',
-          address: '$_id.address',
-          logo: '$_id.logo',
-          distance: '$_id.distance',
-          isFavorite: 1,
+          _id: 0,
+          store: {
+            id: '$_id.storeId',
+            name: '$_id.name',
+            address: '$_id.address',
+            logo: '$_id.logo',
+            distance: '$_id.distance',
+            isLiked: '$isLiked',
+            popularity: '$_id.popularity',
+            createdDate: '$_id.createdDate',
+          },
           popularCakes: 1,
         },
       },
       {
         $sort: {
-          [sortCriteria]: sortCriteria === 'distance' ? 1 : -1,
+          [`store.${sortCriteria}`]: sortCriteria === 'distance' ? 1 : -1,
         },
       },
+      { $skip: skip },
+      { $limit: pageSize },
     ]);
   }
 }

@@ -17,18 +17,21 @@ export class StoresService {
   async getAllStores(
     uid: string,
     sortBy: string,
+    page: string,
     userLatitude?: string,
     userLongitude?: string,
   ) {
     const sortCriteria = setSortCriteria(sortBy);
     const userLatitudeNumber = parseFloat(userLatitude);
     const userLongitudeNumber = parseFloat(userLongitude);
+    const pageInt = parseInt(page, 10);
 
     const allStores = await this.storesRepository.getAllStores(
       uid,
       sortCriteria,
       userLatitudeNumber,
       userLongitudeNumber,
+      pageInt,
     );
     return allStores;
   }

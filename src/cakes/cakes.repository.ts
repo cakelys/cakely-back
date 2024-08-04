@@ -66,6 +66,7 @@ export class CakesRepository {
                 else: false,
               },
             },
+            createdDate: '$createdDate',
           },
           'store.isLiked': {
             $cond: {
@@ -84,7 +85,7 @@ export class CakesRepository {
       },
       {
         $sort: {
-          createdDate: -1,
+          'cake.createdDate': -1,
         },
       },
       {
