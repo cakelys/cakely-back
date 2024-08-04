@@ -38,9 +38,10 @@ export class StoresController {
   }
 
   // 하나 store 가져오기
-  @Get(':id')
-  getStore(@Param('id') id: string) {
-    return this.storesService.getStore(id);
+  @Get(':storeId')
+  getStore(@Param('storeId') storeId: string) {
+    const uid = '665f134a0dfff9c6393100d5';
+    return this.storesService.getStoreById(uid, storeId);
   }
 
   // 스토어의 케이크 가져오기

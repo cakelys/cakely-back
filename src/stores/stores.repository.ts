@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { ObjectId } from 'mongodb';
 import { Model } from 'mongoose';
 
 @Injectable()
@@ -78,7 +79,6 @@ export class StoresRepository {
           as: 'cakeLikes',
         },
       },
-      // 케이크 데이터 그룹화
       {
         $group: {
           _id: {
@@ -155,5 +155,138 @@ export class StoresRepository {
       { $skip: skip },
       { $limit: pageSize },
     ]);
+  }
+
+  async getStoreById(uid: string, storeId: string): Promise<any> {
+    // storeLikes에서 storeId로 검색해서 좋아요 여부 확인
+    const store = await this.storeModel.aggregate([
+      {
+        $match: {
+          _id: new ObjectId(storeId),
+        },
+      },
+      {
+        $lookup: {
+          from: 'storeLikes',
+          localField: '_id',
+          foreignField: 'storeId',
+          as: 'result',
+        },
+      },
+      {
+        $addFields: {
+          likesCount: {
+            $size: '$result',
+          },
+        },
+      },
+      {
+        $unwind: {
+          path: '$result',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      // 케이크 가져오기
+      {
+        $lookup: {
+          from: 'cakes',
+          localField: '_id',
+          foreignField: 'storeId',
+          as: 'cakes',
+        },
+      },
+      // 케이크 데이터 그룹화
+      {
+        $unwind: {
+          path: '$cakes',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: 'cakeLikes',
+          localField: 'cakes._id',
+          foreignField: 'cakeId',
+          as: 'cakeLikes',
+        },
+      },
+      {
+        $group: {
+          _id: {
+            storeId: '$_id',
+            name: '$name',
+            address: '$address',
+            logo: '$logo',
+            likesCount: '$likesCount',
+          },
+          isLiked: {
+            $first: {
+              $cond: {
+                if: { $eq: ['$storeLikes.userId', uid] },
+                then: true,
+                else: false,
+              },
+            },
+          },
+          popularCakes: {
+            $push: {
+              id: '$cakes._id',
+              photo: { $arrayElemAt: ['$cakes.photos', 0] },
+              isLiked: {
+                $cond: {
+                  if: {
+                    $in: [uid, '$cakeLikes.userId'],
+                  },
+                  then: true,
+                  else: false,
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        $addFields: {
+          popularCakes: {
+            $slice: [
+              {
+                $sortArray: {
+                  input: '$popularCakes',
+                  sortBy: { popularity: -1 },
+                },
+              },
+              10, // 최대 10개
+            ],
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          store: {
+            id: '$_id.storeId',
+            name: '$_id.name',
+            address: '$_id.address',
+            logo: '$_id.logo',
+            isFavorite: {
+              $cond: {
+                if: {
+                  $eq: ['$result.userId', new ObjectId(uid)],
+                },
+                then: true,
+                else: false,
+              },
+            },
+            likesCount: '$_id.likesCount',
+          },
+          popularCakes: 1,
+        },
+      },
+    ]);
+
+    if (store.length <= 0) {
+      throw new NotFoundException('해당 스토어를 찾을 수 없습니다.');
+    }
+    return store[0];
   }
 }

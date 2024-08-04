@@ -37,58 +37,14 @@ export class StoresService {
   }
 
   // 하나 store 가져오기
-  async getStore(id: string) {
-    const storeId = new ObjectId(id);
-    const userId = new ObjectId('665f134a0dfff9c6393100d5');
-    // storeLikes에서 storeId로 검색해서 좋아요 여부 확인
-    const store = await this.StoreModel.aggregate([
-      {
-        $match: {
-          _id: storeId,
-        },
-      },
-      {
-        $lookup: {
-          from: 'storeLikes',
-          localField: '_id',
-          foreignField: 'storeId',
-          as: 'result',
-        },
-      },
-      {
-        $unwind: {
-          path: '$result',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $project: {
-          _id: 1,
-          name: 1,
-          address: 1,
-          latitude: 1,
-          longitude: 1,
-          logo: 1,
-          info: 1,
-          description: 1,
-          siteUrl: 1,
-          sizes: 1,
-          shapes: 1,
-          popularity: 1,
-          isFavorite: {
-            $cond: {
-              if: {
-                $eq: ['$result.userId', userId],
-              },
-              then: true,
-              else: false,
-            },
-          },
-        },
-      },
-    ]);
+  async getStoreById(uid: string, storeId: string) {
+    const store = await this.storesRepository.getStoreById(uid, storeId);
 
-    return store[0];
+    // 랜덤으로 popularCakes 배열 중에 케이크 하나 선택해서 photo를 store의 backgroundImage로 설정
+    const randomIndex = Math.floor(Math.random() * store.popularCakes.length);
+    store.store.backgroundImage = store.popularCakes[randomIndex].photo;
+
+    return store;
   }
 
   async getStoreCakes(id: string) {
