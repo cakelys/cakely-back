@@ -1,4 +1,12 @@
-import { Controller, Get, Param, Query, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Query,
+  Logger,
+  Body,
+  Post,
+} from '@nestjs/common';
 import { CakesService } from './cakes.service';
 import {
   setDefaultSort,
@@ -91,5 +99,12 @@ export class CakesController {
       return this.cakesService.getCakeById(uid, cakeId, latitude, longitude);
     }
     return this.cakesService.getCakeById(uid, cakeId);
+  }
+
+  // 케이크id 리스트 받아서 케이크 리스트 가져오기
+  @Post('list')
+  getCakesByIdList(@Body('cakeIds') cakeIds: string[]) {
+    const uid = '665f134a0dfff9c6393100d5';
+    return this.cakesService.getCakesByIds(uid, cakeIds);
   }
 }

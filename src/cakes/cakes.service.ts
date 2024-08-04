@@ -82,4 +82,9 @@ export class CakesService {
     );
     return cake;
   }
+
+  async getCakesByIds(uid: string, cakeIds: string[]) {
+    const cakes = await this.cakesRepository.getCakesByIdData(uid, cakeIds);
+    return cakes;
+  }
 }

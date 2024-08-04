@@ -328,6 +328,11 @@ export class CakesRepository {
         },
       },
       {
+        $addFields: {
+          likesCount: { $size: '$result' }, // Calculate the number of likes
+        },
+      },
+      {
         $unwind: {
           path: '$result',
           preserveNullAndEmptyArrays: true,
@@ -404,6 +409,7 @@ export class CakesRepository {
                 else: false,
               },
             },
+            likesCount: '$likesCount',
           },
           'store.isLiked': {
             $cond: {
@@ -427,6 +433,50 @@ export class CakesRepository {
       throw new NotFoundException('해당 케이크를 찾을 수 없습니다.');
     }
     return { cakeDetailWithStore: cake[0] };
+  }
+
+  async getCakesByIdData(uid: string, cakeIds: string[]): Promise<any> {
+    const cakes = await this.cakeModel.aggregate([
+      {
+        $match: {
+          _id: { $in: cakeIds.map((cakeId) => new ObjectId(cakeId)) },
+        },
+      },
+      {
+        $lookup: {
+          from: 'cakeLikes',
+          localField: '_id',
+          foreignField: 'cakeId',
+          as: 'result',
+        },
+      },
+      {
+        $unwind: {
+          path: '$result',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          cake: {
+            id: '$_id',
+            photo: { $arrayElemAt: ['$photos', 0] },
+            isLiked: {
+              $cond: {
+                if: {
+                  $eq: ['$result.userId', new ObjectId(uid)],
+                },
+                then: true,
+                else: false,
+              },
+            },
+          },
+        },
+      },
+    ]);
+
+    return { cakes };
   }
 
   // 새 케이크 데이터를 추가하는 함수
