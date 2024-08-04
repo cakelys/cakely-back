@@ -18,21 +18,24 @@ export class CakesController {
     @Query('sortBy') sortBy: string,
     @Query('latitude') latitude: string,
     @Query('longitude') longitude: string,
+    @Query('page') page: string,
   ) {
     const uid = '665f134a0dfff9c6393100d5';
 
     const defaultSortBy = setDefaultSort(sortBy);
     validateSortBy(defaultSortBy);
+    validateRequiredField('page', page);
     if (defaultSortBy === 'distance') {
       validateCoordinates(latitude, longitude);
       return this.cakesService.getRecommendCakes(
         uid,
         defaultSortBy,
+        page,
         latitude,
         longitude,
       );
     }
-    return this.cakesService.getRecommendCakes(uid, defaultSortBy);
+    return this.cakesService.getRecommendCakes(uid, defaultSortBy, page);
   }
 
   // 오늘의 케이크 리스트 가져오기
@@ -49,23 +52,31 @@ export class CakesController {
     @Query('sortBy') sortBy: string,
     @Query('latitude') latitude: string,
     @Query('longitude') longitude: string,
+    @Query('page') page: string,
   ) {
     const uid = '665f134a0dfff9c6393100d5';
 
     const defaultSortBy = setDefaultSort(sortBy);
     validateSortBy(defaultSortBy);
     validateRequiredField('category', category);
+    validateRequiredField('page', page);
     if (defaultSortBy === 'distance') {
       validateCoordinates(latitude, longitude);
       return this.cakesService.getCategoryCakes(
         uid,
         category,
         defaultSortBy,
+        page,
         latitude,
         longitude,
       );
     }
-    return this.cakesService.getCategoryCakes(uid, category, defaultSortBy);
+    return this.cakesService.getCategoryCakes(
+      uid,
+      category,
+      defaultSortBy,
+      page,
+    );
   }
 
   // 케이크 상세정보 가져오기
@@ -76,7 +87,6 @@ export class CakesController {
     @Query('longitude') longitude: string,
   ) {
     const uid = '665f134a0dfff9c6393100d5';
-
     if (latitude && longitude) {
       return this.cakesService.getCakeById(uid, cakeId, latitude, longitude);
     }

@@ -8,8 +8,8 @@ export class CakesRepository {
   constructor(@InjectModel('Cake') private readonly cakeModel: Model<any>) {}
 
   // 오늘의 케이크 데이터를 가져오는 함수
-  async getTodayCakesData(uid: string): Promise<any[]> {
-    return this.cakeModel.aggregate([
+  async getTodayCakesData(uid: string): Promise<any> {
+    const todays = await this.cakeModel.aggregate([
       {
         $lookup: {
           from: 'cakeLikes',
@@ -91,6 +91,8 @@ export class CakesRepository {
         $limit: 5,
       },
     ]);
+
+    return { todays };
   }
 
   // 카테고리별 케이크 데이터를 가져오는 함수
@@ -100,8 +102,12 @@ export class CakesRepository {
     sortCriteria: string,
     userLatitude: number,
     userLongitude: number,
+    page: number,
   ): Promise<any> {
-    return this.cakeModel.aggregate([
+    const pageSize = 10; // 한 페이지에 표시할 항목 수
+    const skip = (page - 1) * pageSize; // 페이지 번호에 따라 스킵할 항목 수 계산
+
+    const categoryCakes = await this.cakeModel.aggregate([
       {
         $match: {
           categories: category,
@@ -168,20 +174,31 @@ export class CakesRepository {
       },
       {
         $project: {
-          _id: 1,
-          photo: { $arrayElemAt: ['$photos', 0] },
-          isFavorite: {
-            $cond: {
-              if: {
-                $eq: ['$result.userId', new ObjectId(uid)],
+          _id: 0,
+          cake: {
+            id: '$_id',
+            photo: { $arrayElemAt: ['$photos', 0] },
+            isLiked: {
+              $cond: {
+                if: {
+                  $eq: ['$result.userId', new ObjectId(uid)],
+                },
+                then: true,
+                else: false,
               },
-              then: true,
-              else: false,
             },
           },
         },
       },
+      {
+        $skip: skip,
+      },
+      {
+        $limit: pageSize,
+      },
     ]);
+
+    return { category, categoryCakes: categoryCakes };
   }
 
   async getRecommendCakes(
@@ -189,8 +206,12 @@ export class CakesRepository {
     sortCriteria: string,
     userLatitude: number,
     userLongitude: number,
-  ): Promise<any[]> {
-    const recommendCakes = this.cakeModel.aggregate([
+    page: number,
+  ): Promise<any> {
+    const pageSize = 10; // 한 페이지에 표시할 항목 수
+    const skip = (page - 1) * pageSize; // 페이지 번호에 따라 스킵할 항목 수 계산
+
+    const recommendCakes = await this.cakeModel.aggregate([
       {
         $lookup: {
           from: 'cakeLikes',
@@ -207,7 +228,7 @@ export class CakesRepository {
       },
       {
         $sample: {
-          size: 10,
+          size: 100,
         },
       },
       {
@@ -257,23 +278,32 @@ export class CakesRepository {
       },
       {
         $project: {
-          _id: 1,
-          // photos: 1,
-          photo: { $arrayElemAt: ['$photos', 0] },
-          isFavorite: {
-            $cond: {
-              if: {
-                $eq: ['$result.userId', new ObjectId(uid)],
+          _id: 0,
+          cake: {
+            id: '$_id',
+            // photos: 1,
+            photo: { $arrayElemAt: ['$photos', 0] },
+            isLiked: {
+              $cond: {
+                if: {
+                  $eq: ['$result.userId', new ObjectId(uid)],
+                },
+                then: true,
+                else: false,
               },
-              then: true,
-              else: false,
             },
           },
         },
       },
+      {
+        $skip: skip,
+      },
+      {
+        $limit: pageSize,
+      },
     ]);
 
-    return recommendCakes;
+    return { recommendCakes };
   }
 
   async getCakeByIdData(
@@ -358,11 +388,23 @@ export class CakesRepository {
       },
       {
         $project: {
-          _id: 1,
-          // photos: 1,
-          photo: { $arrayElemAt: ['$photos', 0] },
-          tags: 1,
-          isFavorite: {
+          _id: 0,
+          cake: {
+            // photos: 1,
+            id: '$_id',
+            photo: { $arrayElemAt: ['$photos', 0] },
+            tags: 1,
+            isLiked: {
+              $cond: {
+                if: {
+                  $eq: ['$result.userId', new ObjectId(uid)],
+                },
+                then: true,
+                else: false,
+              },
+            },
+          },
+          'store.isLiked': {
             $cond: {
               if: {
                 $eq: ['$result.userId', new ObjectId(uid)],
@@ -371,20 +413,11 @@ export class CakesRepository {
               else: false,
             },
           },
-          'store.isFavorite': {
-            $cond: {
-              if: {
-                $eq: ['$result.userId', new ObjectId(uid)],
-              },
-              then: true,
-              else: false,
-            },
-          },
-          'store._id': 1,
+          'store.id': '$store._id',
           'store.name': 1,
           'store.logo': 1,
           'store.address': 1,
-          distance: 1,
+          'store.distance': '$distance',
         },
       },
     ]);
@@ -392,7 +425,7 @@ export class CakesRepository {
     if (cake.length <= 0) {
       throw new NotFoundException('해당 케이크를 찾을 수 없습니다.');
     }
-    return cake[0];
+    return { cakeDetailWithStore: cake[0] };
   }
 
   // 새 케이크 데이터를 추가하는 함수

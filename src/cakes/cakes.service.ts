@@ -15,6 +15,7 @@ export class CakesService {
   async getRecommendCakes(
     uid: string,
     sortBY: string,
+    page: string,
     userLatitude?: string,
     userLongitude?: string,
   ) {
@@ -22,12 +23,14 @@ export class CakesService {
     const sortCriteria = setSortCriteria(sortBY);
     const userLatitudeNumber = parseFloat(userLatitude);
     const userLongitudeNumber = parseFloat(userLongitude);
+    const pageInt = parseInt(page, 10);
 
     const recommendedCakes = await this.cakesRepository.getRecommendCakes(
       uid,
       sortCriteria,
       userLatitudeNumber,
       userLongitudeNumber,
+      pageInt,
     );
     return recommendedCakes;
   }
@@ -43,18 +46,22 @@ export class CakesService {
     uid: string,
     category: string,
     sortBy: string,
+    page: string,
     userLatitude?: string,
     userLongitude?: string,
   ) {
     const sortCriteria = setSortCriteria(sortBy);
     const userLatitudeNumber = parseFloat(userLatitude);
     const userLongitudeNumber = parseFloat(userLongitude);
+    const pageInt = parseInt(page, 10);
+
     const categoryCakes = await this.cakesRepository.getCakeByCategory(
       uid,
       category,
       sortCriteria,
       userLatitudeNumber,
       userLongitudeNumber,
+      pageInt,
     );
     return categoryCakes;
   }
@@ -67,7 +74,6 @@ export class CakesService {
   ) {
     const userLatitudeNumber = parseFloat(userLatitude);
     const userLongitudeNumber = parseFloat(userLongitude);
-
     const cake = await this.cakesRepository.getCakeByIdData(
       uid,
       cakeId,
