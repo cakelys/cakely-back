@@ -5,7 +5,10 @@ import { Model } from 'mongoose';
 
 @Injectable()
 export class StoresRepository {
-  constructor(@InjectModel('Store') private readonly storeModel: Model<any>) {}
+  constructor(
+    @InjectModel('Store') private readonly storeModel: Model<any>,
+    @InjectModel('Cake') private readonly cakeModel: Model<any>,
+  ) {}
 
   async getAllStores(
     uid: string,
@@ -366,6 +369,201 @@ export class StoresRepository {
     }
 
     return { storeCakes };
+  }
+
+  async getStoreCake(
+    uid: string,
+    storeId: string,
+    cakeId: string,
+    userLatitude: number,
+    userLongitude: number,
+  ): Promise<any> {
+    const cake = await this.cakeModel.aggregate([
+      {
+        $match: {
+          _id: new ObjectId(cakeId),
+        },
+      },
+      {
+        $lookup: {
+          from: 'cakeLikes',
+          localField: '_id',
+          foreignField: 'cakeId',
+          as: 'result',
+        },
+      },
+      {
+        $addFields: {
+          likesCount: { $size: '$result' }, // Calculate the number of likes
+        },
+      },
+      {
+        $unwind: {
+          path: '$result',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: 'stores',
+          localField: 'storeId',
+          foreignField: '_id',
+          as: 'store',
+        },
+      },
+      {
+        $unwind: {
+          path: '$store',
+        },
+      },
+      {
+        $match: {
+          'store._id': new ObjectId(storeId),
+        },
+      },
+      {
+        $lookup: {
+          from: 'storeLikes',
+          localField: 'store._id',
+          foreignField: 'storeId',
+          as: 'storeLikes',
+        },
+      },
+      {
+        $unwind: {
+          path: '$storeLikes',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $addFields: {
+          distance: {
+            $multiply: [
+              6371, // Earth radius in kilometers
+              {
+                $sqrt: {
+                  $add: [
+                    {
+                      $pow: [
+                        { $subtract: ['$store.latitude', userLatitude] },
+                        2,
+                      ],
+                    },
+                    {
+                      $pow: [
+                        { $subtract: ['$store.longitude', userLongitude] },
+                        2,
+                      ],
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          cake: {
+            // photos: 1,
+            id: '$_id',
+            photo: { $arrayElemAt: ['$photos', 0] },
+            tags: '$tags',
+            isLiked: {
+              $cond: {
+                if: {
+                  $eq: ['$result.userId', new ObjectId(uid)],
+                },
+                then: true,
+                else: false,
+              },
+            },
+            likesCount: '$likesCount',
+          },
+          'store.isLiked': {
+            $cond: {
+              if: {
+                $eq: ['$result.userId', new ObjectId(uid)],
+              },
+              then: true,
+              else: false,
+            },
+          },
+          'store.id': '$store._id',
+          'store.name': 1,
+          'store.logo': 1,
+          'store.address': 1,
+          'store.distance': '$distance',
+          'store.siteUrl': 1,
+        },
+      },
+    ]);
+
+    if (cake.length <= 0) {
+      throw new NotFoundException('해당 스토어의 케이크를 찾을 수 없습니다.');
+    }
+
+    const recommendedCakes = await this.storeModel.aggregate([
+      {
+        $match: {
+          _id: new ObjectId(storeId),
+        },
+      },
+      {
+        $lookup: {
+          from: 'cakes',
+          localField: '_id',
+          foreignField: 'storeId',
+          as: 'cakes',
+        },
+      },
+      {
+        $unwind: {
+          path: '$cakes',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: 'cakeLikes',
+          localField: 'cakes._id',
+          foreignField: 'cakeId',
+          as: 'result',
+        },
+      },
+      {
+        $unwind: {
+          path: '$result',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          cake: {
+            id: '$cakes._id',
+            photo: { $arrayElemAt: ['$cakes.photos', 0] },
+            isLiked: {
+              $cond: {
+                if: {
+                  $eq: ['$result.userId', new ObjectId(uid)],
+                },
+                then: true,
+                else: false,
+              },
+            },
+          },
+        },
+      },
+      {
+        $sample: {
+          size: 10,
+        },
+      },
+    ]);
+
+    return { cakeOverview: { ...cake[0], recommendedCakes: recommendedCakes } };
   }
 
   async getStoreDetails(

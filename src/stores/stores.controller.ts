@@ -55,6 +55,27 @@ export class StoresController {
     return this.storesService.getStoreCakes(uid, storeId, page);
   }
 
+  // 스토어의 한 케이크 가져오기
+  @Get(':storeId/cakes/:cakeId')
+  getStoreCake(
+    @Param('storeId') storeId: string,
+    @Param('cakeId') cakeId: string,
+    @Query('latitude') latitude: string,
+    @Query('longitude') longitude: string,
+  ) {
+    const uid = '665f134a0dfff9c6393100d5';
+    if (latitude && longitude) {
+      return this.storesService.getStoreCake(
+        uid,
+        storeId,
+        cakeId,
+        latitude,
+        longitude,
+      );
+    }
+    return this.storesService.getStoreCake(uid, storeId, cakeId);
+  }
+
   // 스토어의 세부정보 가져오기
   @Get(':storeId/details')
   getStoreDetails(

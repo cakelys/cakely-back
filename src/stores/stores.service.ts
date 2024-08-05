@@ -4,6 +4,8 @@ import { Store } from './entities/store.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { setSortCriteria } from 'src/utils/validation-utils';
 import { StoresRepository } from './stores.repository';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class StoresService {
@@ -55,6 +57,30 @@ export class StoresService {
     );
 
     return storeCakes;
+  }
+
+  async getStoreCake(
+    uid: string,
+    storeId: string,
+    cakeId: string,
+    userLatitude?: string,
+    userLongitude?: string,
+  ) {
+    const userLatitudeNumber = parseFloat(userLatitude);
+    const userLongitudeNumber = parseFloat(userLongitude);
+    const storeCake = await this.storesRepository.getStoreCake(
+      uid,
+      storeId,
+      cakeId,
+      userLatitudeNumber,
+      userLongitudeNumber,
+    );
+
+    const filePath = path.join(__dirname, '../../data/store-notes.json');
+    const storeNotes = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    storeCake.cakeOverview.notes = storeNotes.notes;
+
+    return storeCake;
   }
 
   async getStoreDetails(

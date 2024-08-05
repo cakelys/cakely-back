@@ -399,7 +399,7 @@ export class CakesRepository {
             // photos: 1,
             id: '$_id',
             photo: { $arrayElemAt: ['$photos', 0] },
-            tags: 1,
+            tags: '$tags',
             isLiked: {
               $cond: {
                 if: {
