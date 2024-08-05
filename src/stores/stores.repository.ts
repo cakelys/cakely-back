@@ -361,6 +361,62 @@ export class StoresRepository {
       { $limit: pageSize },
     ]);
 
+    if (storeCakes.length <= 0) {
+      throw new NotFoundException('해당 스토어의 케이크를 찾을 수 없습니다.');
+    }
+
     return { storeCakes };
+  }
+
+  async getStoreDetails(
+    uid: string,
+    storeId: string,
+    userLatitude: number,
+    userLongitude: number,
+  ): Promise<any> {
+    const storeDetails = await this.storeModel.aggregate([
+      {
+        $match: {
+          _id: new ObjectId(storeId),
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          storeDetails: {
+            id: '$_id',
+            address: '$address',
+            latitude: '$latitude',
+            longitude: '$longitude',
+            info: '$info',
+            // 거리 계산
+            distance: {
+              $multiply: [
+                6371, // 지구 반지름 (킬로미터 단위)
+                {
+                  $sqrt: {
+                    $add: [
+                      {
+                        $pow: [{ $subtract: ['$latitude', userLatitude] }, 2],
+                      },
+                      {
+                        $pow: [{ $subtract: ['$longitude', userLongitude] }, 2],
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            sizes: '$sizes',
+            shapes: '$shapes',
+          },
+        },
+      },
+    ]);
+
+    if (storeDetails.length <= 0) {
+      throw new NotFoundException('해당 스토어의 정보를 찾을 수 없습니다.');
+    }
+    return storeDetails[0];
   }
 }
