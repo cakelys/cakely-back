@@ -289,4 +289,78 @@ export class StoresRepository {
     }
     return store[0];
   }
+
+  async getStoreCakes(
+    uid: string,
+    storeId: string,
+    page: number,
+  ): Promise<any> {
+    const pageSize = 10; // 한 페이지에 표시할 항목 수
+    const skip = (page - 1) * pageSize; // 페이지 번호에 따라 스킵할 항목 수 계산
+
+    const storeCakes = await this.storeModel.aggregate([
+      {
+        $match: {
+          _id: new ObjectId(storeId),
+        },
+      },
+      {
+        $lookup: {
+          from: 'cakes',
+          localField: '_id',
+          foreignField: 'storeId',
+          as: 'cakes',
+        },
+      },
+      {
+        $unwind: {
+          path: '$cakes',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: 'cakeLikes',
+          localField: 'cakes._id',
+          foreignField: 'cakeId',
+          as: 'result',
+        },
+      },
+      {
+        $unwind: {
+          path: '$result',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          cake: {
+            id: '$cakes._id',
+            // photos: '$cakes.photos',
+            photo: { $arrayElemAt: ['$cakes.photos', 0] },
+            createdDate: '$cakes.createdDate',
+            isLiked: {
+              $cond: {
+                if: {
+                  $eq: ['$result.userId', new ObjectId(uid)],
+                },
+                then: true,
+                else: false,
+              },
+            },
+          },
+        },
+      },
+      {
+        $sort: {
+          'cake.createdDate': -1,
+        },
+      },
+      { $skip: skip },
+      { $limit: pageSize },
+    ]);
+
+    return { storeCakes };
+  }
 }

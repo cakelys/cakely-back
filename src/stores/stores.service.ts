@@ -47,69 +47,15 @@ export class StoresService {
     return store;
   }
 
-  async getStoreCakes(id: string) {
-    const storeId = new ObjectId(id);
-    const cakes = await this.StoreModel.aggregate([
-      {
-        $match: {
-          _id: storeId,
-        },
-      },
-      {
-        $lookup: {
-          from: 'cakes',
-          localField: '_id',
-          foreignField: 'storeId',
-          as: 'cakes',
-        },
-      },
-      {
-        $unwind: {
-          path: '$cakes',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $lookup: {
-          from: 'cakeLikes',
-          localField: 'cakes._id',
-          foreignField: 'cakeId',
-          as: 'result',
-        },
-      },
-      {
-        $unwind: {
-          path: '$result',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $project: {
-          _id: '$cakes._id',
-          name: '$cakes.name',
-          // photos: '$cakes.photos',
-          photo: { $arrayElemAt: ['$cakes.photos', 0] },
-          tags: '$cakes.tags',
-          categories: '$cakes.categories',
-          popularity: '$cakes.popularity',
-          createdDate: '$cakes.createdDate',
-          isFavorite: {
-            $cond: {
-              if: {
-                $eq: [
-                  '$result.userId',
-                  new ObjectId('665f134a0dfff9c6393100d5'),
-                ],
-              },
-              then: true,
-              else: false,
-            },
-          },
-        },
-      },
-    ]);
+  async getStoreCakes(uid: string, storeId: string, page: string) {
+    const pageInt = parseInt(page, 10);
+    const storeCakes = await this.storesRepository.getStoreCakes(
+      uid,
+      storeId,
+      pageInt,
+    );
 
-    return cakes;
+    return storeCakes;
   }
 
   async getStorePopularCakes(id: string) {

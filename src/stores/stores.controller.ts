@@ -45,9 +45,14 @@ export class StoresController {
   }
 
   // 스토어의 케이크 가져오기
-  @Get(':id/cakes')
-  getStoreCakes(@Param('id') id: string) {
-    return this.storesService.getStoreCakes(id);
+  @Get(':storeId/cakes')
+  getStoreCakes(
+    @Param('storeId') storeId: string,
+    @Query('page') page: string,
+  ) {
+    const uid = '665f134a0dfff9c6393100d5';
+    validateRequiredField('page', page);
+    return this.storesService.getStoreCakes(uid, storeId, page);
   }
 
   // 스토어의 인기 케이크 가져오기
