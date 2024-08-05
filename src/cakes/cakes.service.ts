@@ -4,6 +4,8 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { CakesRepository } from './cakes.repository';
 import { setSortCriteria } from 'src/utils/validation-utils';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class CakesService {
@@ -80,6 +82,10 @@ export class CakesService {
       userLatitudeNumber,
       userLongitudeNumber,
     );
+
+    const filePath = path.join(__dirname, '../../data/store-notes.json');
+    const storeNotes = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    cake.cakeOverview.notes = storeNotes.notes;
     return cake;
   }
 

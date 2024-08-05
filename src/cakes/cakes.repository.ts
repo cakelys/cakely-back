@@ -433,7 +433,43 @@ export class CakesRepository {
     if (cake.length <= 0) {
       throw new NotFoundException('해당 케이크를 찾을 수 없습니다.');
     }
-    return { cakeDetailWithStore: cake[0] };
+
+    const recommendedCakes = await this.cakeModel.aggregate([
+      {
+        $sample: { size: 10 }, // 랜덤으로 10개의 케이크를 샘플링
+      },
+      {
+        $lookup: {
+          from: 'cakeLikes',
+          localField: '_id',
+          foreignField: 'cakeId',
+          as: 'likes',
+        },
+      },
+      {
+        $addFields: {
+          isLiked: {
+            $cond: {
+              if: {
+                $eq: [new ObjectId(uid), '$cakeLikes.userId'],
+              },
+              then: true,
+              else: false,
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          id: '$_id',
+          photo: { $arrayElemAt: ['$photos', 0] },
+          isLiked: '$isLiked',
+        },
+      },
+    ]);
+
+    return { cakeOverview: { ...cake[0], recommendedCakes: recommendedCakes } };
   }
 
   async getCakesByIdData(uid: string, cakeIds: string[]): Promise<any> {
