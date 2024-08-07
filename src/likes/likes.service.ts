@@ -7,6 +7,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { CakeLike } from './entities/cakeLike.entity';
 import { ObjectId } from 'mongodb';
 import { LikesRepository } from './likes.repository';
+import { setSortCriteria } from 'src/utils/validation-utils';
 
 @Injectable()
 export class LikesService {
@@ -69,52 +70,27 @@ export class LikesService {
   }
 
   // 전체 찜 가게 리스트 가져오기
-  async getAllStoreLikes() {
-    const userId = new ObjectId('665f134a0dfff9c6393100d5');
-    const allStoreLikes = await this.StoreLikeModel.aggregate([
-      {
-        $match: {
-          userId: userId,
-        },
-      },
-      {
-        $lookup: {
-          from: 'stores',
-          localField: 'storeId',
-          foreignField: '_id',
-          as: 'store',
-        },
-      },
-      {
-        $unwind: {
-          path: '$store',
-          // preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $project: {
-          _id: '$store._id',
-          name: '$store.name',
-          address: '$store.address',
-          latitude: '$store.latitude',
-          longitude: '$store.longitude',
-          logo: '$store.logo',
-          info: '$store.info',
-          description: '$store.description',
-          siteUrl: '$store.siteUrl',
-          sizes: '$store.sizes',
-          shapes: '$store.shapes',
-          popularity: '$store.popularity',
-        },
-      },
-      {
-        $addFields: {
-          isFavorite: true,
-        },
-      },
-    ]);
+  async getAllStoreLikes(
+    uid: string,
+    sortBy: string,
+    page: string,
+    userLatitude?: string,
+    userLongitude?: string,
+  ) {
+    const sortCriteria = setSortCriteria(sortBy);
+    const userLatitudeNumber = parseFloat(userLatitude);
+    const userLongitudeNumber = parseFloat(userLongitude);
+    const pageInt = parseInt(page, 10);
 
-    return allStoreLikes;
+    const allLikedStores = await this.likesRepository.getAllLikedStores(
+      uid,
+      sortCriteria,
+      userLatitudeNumber,
+      userLongitudeNumber,
+      pageInt,
+    );
+
+    return allLikedStores;
   }
 
   // 찜 케이크 추가 -> 테스트 x
