@@ -1,7 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { Cake } from './entities/cake.entity';
-import { Model } from 'mongoose';
-import { InjectModel } from '@nestjs/mongoose';
 import { CakesRepository } from './cakes.repository';
 import { setSortCriteria } from 'src/utils/validation-utils';
 import * as fs from 'fs';
@@ -9,10 +6,7 @@ import * as path from 'path';
 
 @Injectable()
 export class CakesService {
-  constructor(
-    private readonly cakesRepository: CakesRepository,
-    @InjectModel(Cake.name) private readonly CakeModel: Model<Cake>,
-  ) {}
+  constructor(private readonly cakesRepository: CakesRepository) {}
 
   async getRecommendCakes(
     uid: string,

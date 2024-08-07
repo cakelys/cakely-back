@@ -1,7 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { Model } from 'mongoose';
-import { Store } from './entities/store.entity';
-import { InjectModel } from '@nestjs/mongoose';
 import { setSortCriteria } from 'src/utils/validation-utils';
 import { StoresRepository } from './stores.repository';
 import * as fs from 'fs';
@@ -9,10 +6,7 @@ import * as path from 'path';
 
 @Injectable()
 export class StoresService {
-  constructor(
-    private readonly storesRepository: StoresRepository,
-    @InjectModel(Store.name) private readonly StoreModel: Model<Store>,
-  ) {}
+  constructor(private readonly storesRepository: StoresRepository) {}
 
   // 전체 store 리스트 가져오기
   async getAllStores(
