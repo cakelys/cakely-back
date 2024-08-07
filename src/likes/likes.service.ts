@@ -6,14 +6,23 @@ import { StoreLike } from './entities/storeLike.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { CakeLike } from './entities/cakeLike.entity';
 import { ObjectId } from 'mongodb';
+import { LikesRepository } from './likes.repository';
 
 @Injectable()
 export class LikesService {
   constructor(
+    private readonly likesRepository: LikesRepository,
     @InjectModel(StoreLike.name)
     private readonly StoreLikeModel: Model<StoreLike>,
     @InjectModel(CakeLike.name) private readonly CakeLikeModel: Model<CakeLike>,
   ) {}
+
+  // 찜한 가게의 새로 나온 케이크 리스트 가져오기
+  async getNewCakesInLikedStores(uid: string) {
+    const newCakesInLikedStores =
+      await this.likesRepository.getNewCakesInLikedStores(uid);
+    return newCakesInLikedStores;
+  }
 
   // 전체 찜 케이크 리스트 가져오기
   async getAllCakeLikes() {

@@ -4,6 +4,7 @@ import { LikesController } from './likes.controller';
 import { StoreLike, StoreLikeSchema } from './entities/storeLike.entity';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CakeLike, CakeLikeSchema } from './entities/cakeLike.entity';
+import { LikesRepository } from './likes.repository';
 
 @Module({
   imports: [
@@ -13,6 +14,6 @@ import { CakeLike, CakeLikeSchema } from './entities/cakeLike.entity';
     ]),
   ],
   controllers: [LikesController],
-  providers: [LikesService],
+  providers: [LikesService, LikesRepository],
 })
 export class LikesModule {}
