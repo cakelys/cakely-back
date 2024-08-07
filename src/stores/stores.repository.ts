@@ -366,6 +366,11 @@ export class StoresRepository {
           'cake.createdDate': -1,
         },
       },
+      {
+        $project: {
+          'cake.createdDate': 0,
+        },
+      },
       { $skip: skip },
       { $limit: pageSize },
     ]);
