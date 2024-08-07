@@ -89,6 +89,11 @@ export class CakesRepository {
         },
       },
       {
+        $project: {
+          'cake.createdDate': 0,
+        },
+      },
+      {
         $limit: 5,
       },
     ]);
