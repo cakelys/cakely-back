@@ -87,4 +87,9 @@ export class CakesService {
     const cakes = await this.cakesRepository.getCakesByIdData(uid, cakeIds);
     return cakes;
   }
+
+  async getCategories() {
+    const categories = await this.cakesRepository.getCategories();
+    return categories;
+  }
 }

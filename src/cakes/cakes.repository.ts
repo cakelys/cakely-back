@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class CakesRepository {
@@ -519,6 +521,47 @@ export class CakesRepository {
     ]);
 
     return { cakes };
+  }
+
+  async getCategories(): Promise<any> {
+    const filePath = path.join(__dirname, '../../data/category-list.json');
+    const categories = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+
+    // 카테고리별 가장 최근 케이크 하나의 photo를 추가
+    const categoriesWithPhotos = await Promise.all(
+      categories.map(async (category) => {
+        const cake = await this.cakeModel.aggregate([
+          {
+            $match: {
+              categories: category.name,
+            },
+          },
+          {
+            $sort: {
+              createdDate: -1,
+            },
+          },
+          {
+            $limit: 1,
+          },
+          {
+            $project: {
+              _id: 0,
+              photo: { $arrayElemAt: ['$photos', 0] },
+            },
+          },
+        ]);
+
+        return {
+          category: {
+            ...category,
+            photo: cake?.[0]?.photo ? cake?.[0]?.photo : null,
+          },
+        };
+      }),
+    );
+
+    return { categories: categoriesWithPhotos };
   }
 
   // 새 케이크 데이터를 추가하는 함수

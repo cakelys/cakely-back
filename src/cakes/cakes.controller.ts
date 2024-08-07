@@ -87,6 +87,19 @@ export class CakesController {
     );
   }
 
+  // 케이크id 리스트 받아서 케이크 리스트 가져오기
+  @Post('list')
+  getCakesByIdList(@Body('cakeIds') cakeIds: string[]) {
+    const uid = '665f134a0dfff9c6393100d5';
+    return this.cakesService.getCakesByIds(uid, cakeIds);
+  }
+
+  // 케이크 카테고리 리스트 가져오기
+  @Get('categories')
+  getCategories() {
+    return this.cakesService.getCategories();
+  }
+
   // 케이크 상세정보 가져오기
   @Get(':cakeId')
   getCakeById(
@@ -99,12 +112,5 @@ export class CakesController {
       return this.cakesService.getCakeById(uid, cakeId, latitude, longitude);
     }
     return this.cakesService.getCakeById(uid, cakeId);
-  }
-
-  // 케이크id 리스트 받아서 케이크 리스트 가져오기
-  @Post('list')
-  getCakesByIdList(@Body('cakeIds') cakeIds: string[]) {
-    const uid = '665f134a0dfff9c6393100d5';
-    return this.cakesService.getCakesByIds(uid, cakeIds);
   }
 }
