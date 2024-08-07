@@ -277,7 +277,7 @@ export class StoresRepository {
             name: '$_id.name',
             address: '$_id.address',
             logo: '$_id.logo',
-            isFavorite: {
+            isLiked: {
               $cond: {
                 if: {
                   $eq: ['$result.userId', new ObjectId(uid)],
