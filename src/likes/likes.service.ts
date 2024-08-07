@@ -26,47 +26,27 @@ export class LikesService {
   }
 
   // 전체 찜 케이크 리스트 가져오기
-  async getAllCakeLikes() {
-    const userId = new ObjectId('665f134a0dfff9c6393100d5');
-    const allCakeLikes = await this.CakeLikeModel.aggregate([
-      {
-        $match: {
-          userId: userId,
-        },
-      },
-      {
-        $lookup: {
-          from: 'cakes',
-          localField: 'cakeId',
-          foreignField: '_id',
-          as: 'cake',
-        },
-      },
-      {
-        $unwind: {
-          path: '$cake',
-          // preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $project: {
-          _id: '$cake._id',
-          // photos: '$cake.photos',
-          photo: { $arrayElemAt: ['$cake.photos', 0] },
-          tags: '$cake.tags',
-          categories: '$cake.categories',
-          popularity: '$cake.popularity',
-          createdDate: '$cake.createdDate',
-        },
-      },
-      {
-        $addFields: {
-          isFavorite: true,
-        },
-      },
-    ]);
+  async getAllLikedCakes(
+    uid: string,
+    sortBy: string,
+    page: string,
+    userLatitude?: string,
+    userLongitude?: string,
+  ) {
+    const sortCriteria = setSortCriteria(sortBy);
+    const userLatitudeNumber = parseFloat(userLatitude);
+    const userLongitudeNumber = parseFloat(userLongitude);
+    const pageInt = parseInt(page, 10);
 
-    return allCakeLikes;
+    const allLikedCakes = await this.likesRepository.getAllLikedCakes(
+      uid,
+      sortCriteria,
+      userLatitudeNumber,
+      userLongitudeNumber,
+      pageInt,
+    );
+
+    return allLikedCakes;
   }
 
   // 전체 찜 가게 리스트 가져오기

@@ -7,6 +7,7 @@ import { Model } from 'mongoose';
 export class LikesRepository {
   constructor(
     @InjectModel('StoreLike') private readonly StoreLikeModel: Model<any>,
+    @InjectModel('CakeLike') private readonly CakeLikeModel: Model<any>,
   ) {}
 
   async getNewCakesInLikedStores(uid: string) {
@@ -196,5 +197,129 @@ export class LikesRepository {
     ]);
 
     return { likedStores: allLikedStores };
+  }
+
+  async getAllLikedCakes(
+    uid: string,
+    sortCriteria: string,
+    userLatitude: number,
+    userLongitude: number,
+    page: number,
+  ): Promise<any> {
+    const pageSize = 10; // 한 페이지에 표시할 항목 수
+    const skip = (page - 1) * pageSize; // 페이지 번호에 따라 스킵할 항목 수 계산
+
+    const allLikedCakes = await this.CakeLikeModel.aggregate([
+      {
+        $match: {
+          userId: new ObjectId(uid),
+        },
+      },
+      {
+        $lookup: {
+          from: 'cakes',
+          localField: 'cakeId',
+          foreignField: '_id',
+          as: 'cake',
+        },
+      },
+      {
+        $unwind: {
+          path: '$cake',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: 'stores',
+          localField: 'cake.storeId',
+          foreignField: '_id',
+          as: 'store',
+        },
+      },
+      {
+        $unwind: {
+          path: '$store',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $addFields: {
+          distance: {
+            $multiply: [
+              6371, // 지구의 반지름
+              {
+                $sqrt: {
+                  $add: [
+                    {
+                      $pow: [
+                        {
+                          $subtract: ['$store.latitude', userLatitude],
+                        },
+                        2,
+                      ],
+                    },
+                    {
+                      $pow: [
+                        {
+                          $subtract: ['$store.longitude', userLongitude],
+                        },
+                        2,
+                      ],
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      },
+      {
+        $addFields: {
+          sortField: {
+            $switch: {
+              branches: [
+                {
+                  case: { $eq: [sortCriteria, 'createdDate'] },
+                  then: '$createdDate',
+                },
+                {
+                  case: { $eq: [sortCriteria, 'popularity'] },
+                  then: '$cake.popularity',
+                },
+                {
+                  case: { $eq: [sortCriteria, 'distance'] },
+                  then: '$distance',
+                },
+              ],
+              default: '$cake.popularity',
+            },
+          },
+        },
+      },
+      {
+        $sort: {
+          sortField: sortCriteria === 'distance' ? 1 : -1,
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          cake: {
+            id: '$cake._id',
+            photo: { $arrayElemAt: ['$cake.photos', 0] },
+          },
+        },
+      },
+      {
+        $addFields: {
+          'cake.isFavorite': true,
+        },
+      },
+      { $skip: skip },
+      { $limit: pageSize },
+    ]);
+
+    return { likedCakes: allLikedCakes };
   }
 }
