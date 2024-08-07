@@ -155,6 +155,12 @@ export class StoresRepository {
           [`store.${sortCriteria}`]: sortCriteria === 'distance' ? 1 : -1,
         },
       },
+      {
+        $project: {
+          'store.popularity': 0,
+          'store.createdDate': 0,
+        },
+      },
       { $skip: skip },
       { $limit: pageSize },
     ]);
