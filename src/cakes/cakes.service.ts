@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { CakesRepository } from './cakes.repository';
 import { setSortCriteria } from 'src/utils/validation-utils';
-import * as fs from 'fs';
-import * as path from 'path';
+import { S3Service } from 'src/s3/s3.service';
 
 @Injectable()
 export class CakesService {
-  constructor(private readonly cakesRepository: CakesRepository) {}
+  constructor(
+    private readonly cakesRepository: CakesRepository,
+    private readonly s3Service: S3Service,
+  ) {}
 
   async getRecommendCakes(
     uid: string,
@@ -77,9 +79,12 @@ export class CakesService {
       userLongitudeNumber,
     );
 
-    const filePath = path.join(__dirname, '../../data/store-notes.json');
-    const storeNotes = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    cake.cakeOverview.notes = storeNotes.notes;
+    const key = 'app-data/store-notes.json';
+    const storeNotesFileData = await this.s3Service.getFile(key);
+    const storeNotesFileContent = storeNotesFileData.toString('utf-8');
+    const storeNotesJsonData = JSON.parse(storeNotesFileContent);
+
+    cake.cakeOverview.notes = storeNotesJsonData.notes;
     return cake;
   }
 
@@ -89,7 +94,14 @@ export class CakesService {
   }
 
   async getCategories() {
-    const categories = await this.cakesRepository.getCategories();
+    const key = 'app-data/category-list.json';
+    const categoryListFileData = await this.s3Service.getFile(key);
+    const categoryListFileContent = categoryListFileData.toString('utf-8');
+    const categoryListJsonData = JSON.parse(categoryListFileContent);
+
+    const categories = await this.cakesRepository.getCategories(
+      categoryListJsonData,
+    );
     return categories;
   }
 }

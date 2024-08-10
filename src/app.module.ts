@@ -8,6 +8,7 @@ import { StoresModule } from './stores/stores.module';
 import { LikesModule } from './likes/likes.module';
 // import { UsersModule } from './users/users.module';
 // import { AuthModule } from './auth/auth.module';
+import { S3Module } from './s3/s3.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { LikesModule } from './likes/likes.module';
     MongooseModule.forRoot(process.env.MONGODB_URI, {
       dbName: process.env.MONGODB_DBNAME,
     }),
+    S3Module,
     // UsersModule,
     // AuthModule,
   ],
