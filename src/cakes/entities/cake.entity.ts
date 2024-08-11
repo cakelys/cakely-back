@@ -7,8 +7,8 @@ export class Cake extends Document {
   @Prop({ type: ObjectId })
   id: string;
 
-  @Prop({ type: String })
-  storeId: string;
+  @Prop({ type: ObjectId })
+  storeId: ObjectId;
 
   @Prop({ type: [{ type: String }] })
   tags: string[];
