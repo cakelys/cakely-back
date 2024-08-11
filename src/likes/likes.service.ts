@@ -73,12 +73,16 @@ export class LikesService {
     return allLikedStores;
   }
 
-  // 찜 케이크 추가 -> 테스트 x
-  async createCakeLike(createCakeLikeDto: CreateCakeLikeDto) {
-    const userId = new ObjectId('665f134a0dfff9c6393100d5');
-    createCakeLikeDto.userId = userId;
-    const newLike = new this.CakeLikeModel(createCakeLikeDto);
-    return newLike.save();
+  // 찜 케이크 추가
+  async createCakeLike(uid: string, cakeId: string) {
+    const createCakeLikeDto = new CreateCakeLikeDto(
+      new ObjectId(uid),
+      new ObjectId(cakeId),
+    );
+    const newLike = await this.likesRepository.createCakeLike(
+      createCakeLikeDto,
+    );
+    return newLike;
   }
 
   // 찜 가게 추가 -> 테스트 x

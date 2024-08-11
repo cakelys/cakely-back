@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ObjectId } from 'mongodb';
 import { Document } from 'mongoose';
 
-@Schema({ timestamps: true, collection: 'cakeLikes' })
+@Schema({ timestamps: false, collection: 'cakeLikes' })
 export class CakeLike extends Document {
   @Prop({ type: ObjectId })
   id: string;

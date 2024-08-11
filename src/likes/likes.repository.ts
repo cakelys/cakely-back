@@ -1,13 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ObjectId } from 'mongodb';
 import { Model } from 'mongoose';
+import { CreateCakeLikeDto } from './dto/create-cake-like.dto';
 
 @Injectable()
 export class LikesRepository {
   constructor(
     @InjectModel('StoreLike') private readonly StoreLikeModel: Model<any>,
     @InjectModel('CakeLike') private readonly CakeLikeModel: Model<any>,
+    @InjectModel('Cake') private readonly CakeModel: Model<any>,
   ) {}
 
   async getNewCakesInLikedStores(uid: string) {
@@ -321,5 +323,28 @@ export class LikesRepository {
     ]);
 
     return { likedCakes: allLikedCakes };
+  }
+
+  async createCakeLike(createCakeLikeDto: CreateCakeLikeDto) {
+    // 존재하는 케이크인지 체크
+    const cake = await this.CakeModel.findById(createCakeLikeDto.cakeId);
+    if (!cake) {
+      throw new NotFoundException('Invalid cake id');
+    }
+
+    // like 중복 체크
+    const isExist = await this.CakeLikeModel.findOne({
+      userId: createCakeLikeDto.userId,
+      cakeId: createCakeLikeDto.cakeId,
+    });
+
+    if (isExist) {
+      throw new NotFoundException('Already liked');
+    }
+
+    const newLike = new this.CakeLikeModel(createCakeLikeDto);
+    await newLike.save();
+
+    return new CreateCakeLikeDto(newLike.userId, newLike.cakeId, newLike._id);
   }
 }

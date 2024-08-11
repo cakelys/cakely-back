@@ -9,7 +9,6 @@ import {
 } from '@nestjs/common';
 import { LikesService } from './likes.service';
 import { CreateStoreLikeDto } from './dto/create-store-like.dto';
-import { CreateCakeLikeDto } from './dto/create-cake-like.dto';
 import {
   setDefaultSort,
   validateCoordinates,
@@ -85,9 +84,10 @@ export class LikesController {
   }
 
   // 케이크 찜하기
-  @Post('cakes')
-  createCakeLike(@Body() createCakeLikeDto: CreateCakeLikeDto) {
-    return this.likesService.createCakeLike(createCakeLikeDto);
+  @Post('cakes/:cakeId')
+  createCakeLike(@Param('cakeId') cakeId: string) {
+    const uid = '665f134a0dfff9c6393100d5';
+    return this.likesService.createCakeLike(uid, cakeId);
   }
 
   // 가게 찜하기
