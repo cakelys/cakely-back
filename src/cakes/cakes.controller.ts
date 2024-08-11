@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Get,
-  Param,
-  Query,
-  Logger,
-  Body,
-  Post,
-} from '@nestjs/common';
+import { Controller, Get, Param, Query, Body, Post } from '@nestjs/common';
 import { CakesService } from './cakes.service';
 import {
   setDefaultSort,
@@ -17,7 +9,6 @@ import {
 
 @Controller('cakes')
 export class CakesController {
-  private readonly logger = new Logger(CakesController.name);
   constructor(private readonly cakesService: CakesService) {}
 
   // 추천케이크 리스트 가져오기

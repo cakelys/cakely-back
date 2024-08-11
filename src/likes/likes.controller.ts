@@ -1,14 +1,5 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Delete,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Post, Param, Delete, Query } from '@nestjs/common';
 import { LikesService } from './likes.service';
-import { CreateStoreLikeDto } from './dto/create-store-like.dto';
 import {
   setDefaultSort,
   validateCoordinates,
@@ -97,14 +88,17 @@ export class LikesController {
     return this.likesService.createStoreLike(uid, storeId);
   }
 
-  @Delete('cakes:id')
-  deleteCakeLike(@Param('id') id: string) {
-    return this.likesService.deleteCakeLike(id);
+  // 케이크 찜 삭제하기
+  @Delete('cakes/:cakeId')
+  deleteCakeLike(@Param('cakeId') cakeId: string) {
+    const uid = '665f134a0dfff9c6393100d5';
+    return this.likesService.deleteCakeLike(uid, cakeId);
   }
 
   // 가게 찜 삭제하기
-  @Delete('stores/:id')
-  deleteStoreLike(@Param('id') id: string) {
-    return this.likesService.deleteStoreLike(id);
+  @Delete('stores/:storeId')
+  deleteStoreLike(@Param('storeId') storeId: string) {
+    const uid = '665f134a0dfff9c6393100d5';
+    return this.likesService.deleteStoreLike(uid, storeId);
   }
 }

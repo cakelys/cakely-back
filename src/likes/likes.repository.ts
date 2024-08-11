@@ -372,4 +372,38 @@ export class LikesRepository {
 
     return new CreateStoreLikeDto(newLike.userId, newLike.storeId, newLike._id);
   }
+
+  async deleteCakeLike(uid: string, cakeId: string) {
+    // 케이크 존재 확인
+    const cake = await this.CakeModel.findById(cakeId);
+    if (!cake) {
+      throw new NotFoundException('Cake not found');
+    }
+
+    const deletedCakeLike = await this.CakeLikeModel.deleteOne({
+      userId: new ObjectId(uid),
+      cakeId: new ObjectId(cakeId),
+    });
+
+    if (deletedCakeLike.deletedCount === 0) {
+      throw new NotFoundException('Like not found');
+    }
+  }
+
+  async deleteStoreLike(uid: string, storeId: string) {
+    // store 존재 확인
+    const store = await this.StoreModel.findById(storeId);
+    if (!store) {
+      throw new NotFoundException('Store not found');
+    }
+
+    const deletedStoreLike = await this.StoreLikeModel.deleteOne({
+      userId: new ObjectId(uid),
+      storeId: new ObjectId(storeId),
+    });
+
+    if (deletedStoreLike.deletedCount === 0) {
+      throw new NotFoundException('Like not found');
+    }
+  }
 }

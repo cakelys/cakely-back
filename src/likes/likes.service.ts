@@ -1,22 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCakeLikeDto } from './dto/create-cake-like.dto';
 import { CreateStoreLikeDto } from './dto/create-store-like.dto';
-import { Model } from 'mongoose';
-import { StoreLike } from './entities/storeLike.entity';
-import { InjectModel } from '@nestjs/mongoose';
-import { CakeLike } from './entities/cakeLike.entity';
 import { ObjectId } from 'mongodb';
 import { LikesRepository } from './likes.repository';
 import { setSortCriteria } from 'src/utils/validation-utils';
 
 @Injectable()
 export class LikesService {
-  constructor(
-    private readonly likesRepository: LikesRepository,
-    @InjectModel(StoreLike.name)
-    private readonly StoreLikeModel: Model<StoreLike>,
-    @InjectModel(CakeLike.name) private readonly CakeLikeModel: Model<CakeLike>,
-  ) {}
+  constructor(private readonly likesRepository: LikesRepository) {}
 
   // 찜한 가게의 새로 나온 케이크 리스트 가져오기
   async getNewCakesInLikedStores(uid: string) {
@@ -97,23 +88,21 @@ export class LikesService {
     return newLike;
   }
 
-  // 찜 케이크 삭제 -> not tested
-  async deleteCakeLike(id: string): Promise<any> {
-    const userId = new ObjectId('665f134a0dfff9c6393100d5');
-    const deletedLike = await this.CakeLikeModel.deleteOne({
-      userId: userId,
-      cakeId: id,
-    });
-
-    return deletedLike;
+  // 찜 케이크 삭제
+  async deleteCakeLike(uid: string, cakeId: string) {
+    const deletedCakeLike = await this.likesRepository.deleteCakeLike(
+      uid,
+      cakeId,
+    );
+    return deletedCakeLike;
   }
 
-  // 찜 가게 삭제 -> not tested
-  async deleteStoreLike(id: string): Promise<any> {
-    const userId = new ObjectId('665f134a0dfff9c6393100d5');
-    return this.StoreLikeModel.deleteOne({
-      userId: userId,
-      storeId: id,
-    });
+  // 찜 가게 삭제
+  async deleteStoreLike(uid: string, storeId: string) {
+    const deletedStoreLike = await this.likesRepository.deleteStoreLike(
+      uid,
+      storeId,
+    );
+    return deletedStoreLike;
   }
 }
