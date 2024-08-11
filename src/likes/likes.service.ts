@@ -85,12 +85,16 @@ export class LikesService {
     return newLike;
   }
 
-  // 찜 가게 추가 -> 테스트 x
-  async createStoreLike(createStoreLikeDto: CreateStoreLikeDto) {
-    const userId = new ObjectId('665f134a0dfff9c6393100d5');
-    createStoreLikeDto.userId = userId;
-    const newLike = new this.StoreLikeModel(createStoreLikeDto);
-    return newLike.save();
+  // 찜 가게 추가
+  async createStoreLike(uid: string, storeId: string) {
+    const createStoreLikeDto = new CreateStoreLikeDto(
+      new ObjectId(uid),
+      new ObjectId(storeId),
+    );
+    const newLike = await this.likesRepository.createStoreLike(
+      createStoreLikeDto,
+    );
+    return newLike;
   }
 
   // 찜 케이크 삭제 -> not tested

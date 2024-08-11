@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { ObjectId } from 'mongodb';
 import { Model } from 'mongoose';
 import { CreateCakeLikeDto } from './dto/create-cake-like.dto';
+import { CreateStoreLikeDto } from './dto/create-store-like.dto';
 
 @Injectable()
 export class LikesRepository {
@@ -10,6 +11,7 @@ export class LikesRepository {
     @InjectModel('StoreLike') private readonly StoreLikeModel: Model<any>,
     @InjectModel('CakeLike') private readonly CakeLikeModel: Model<any>,
     @InjectModel('Cake') private readonly CakeModel: Model<any>,
+    @InjectModel('Store') private readonly StoreModel: Model<any>,
   ) {}
 
   async getNewCakesInLikedStores(uid: string) {
@@ -346,5 +348,28 @@ export class LikesRepository {
     await newLike.save();
 
     return new CreateCakeLikeDto(newLike.userId, newLike.cakeId, newLike._id);
+  }
+
+  async createStoreLike(createStoreLikeDto: CreateStoreLikeDto) {
+    // 존재하는 store인지 체크
+    const store = await this.StoreModel.findById(createStoreLikeDto.storeId);
+    if (!store) {
+      throw new NotFoundException('Invalid store id');
+    }
+
+    // like 중복 체크
+    const isExist = await this.StoreLikeModel.findOne({
+      userId: createStoreLikeDto.userId,
+      storeId: createStoreLikeDto.storeId,
+    });
+
+    if (isExist) {
+      throw new NotFoundException('Already liked');
+    }
+
+    const newLike = new this.StoreLikeModel(createStoreLikeDto);
+    await newLike.save();
+
+    return new CreateStoreLikeDto(newLike.userId, newLike.storeId, newLike._id);
   }
 }

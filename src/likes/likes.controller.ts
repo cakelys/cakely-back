@@ -91,9 +91,10 @@ export class LikesController {
   }
 
   // 가게 찜하기
-  @Post('stores')
-  createStoreLike(@Body() createStoreLikeDto: CreateStoreLikeDto) {
-    return this.likesService.createStoreLike(createStoreLikeDto);
+  @Post('stores/:storeId')
+  createStoreLike(@Param('storeId') storeId: string) {
+    const uid = '665f134a0dfff9c6393100d5';
+    return this.likesService.createStoreLike(uid, storeId);
   }
 
   @Delete('cakes:id')

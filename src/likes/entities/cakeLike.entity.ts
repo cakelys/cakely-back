@@ -7,11 +7,11 @@ export class CakeLike extends Document {
   @Prop({ type: ObjectId })
   id: string;
 
-  @Prop({ type: String })
-  userId: string;
+  @Prop({ type: ObjectId })
+  userId: ObjectId;
 
-  @Prop({ type: String })
-  cakeId: string;
+  @Prop({ type: ObjectId })
+  cakeId: ObjectId;
 
   @Prop({ type: Date })
   createdDate: Date;
