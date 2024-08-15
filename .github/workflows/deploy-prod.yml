@@ -23,7 +23,7 @@ jobs:
         run: |
           echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" >> .env
           echo "MONGODB_DBNAME=${{ secrets.MONGODB_DBNAME_PROD }}" >> .env
-          echo "S3_BUCKET_NAME"=${{ secrets.S3_BUCKET_NAME }}" >> .env
+          echo "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}" >> .env
           echo "S3_REGION=${{ secrets.S3_REGION }}" >> .env
       - name: Display .env file
         run: cat .env
