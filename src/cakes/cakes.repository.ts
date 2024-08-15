@@ -500,15 +500,13 @@ export class CakesRepository {
         ]);
 
         return {
-          category: {
-            ...category,
-            photo: cake?.[0]?.photo ? cake?.[0]?.photo : null,
-          },
+          ...category,
+          photo: cake?.[0]?.photo ? cake?.[0]?.photo : null,
         };
       }),
     );
 
-    return { categories: categoriesWithPhotos };
+    return categoriesWithPhotos;
   }
 
   // 새 케이크 데이터를 추가하는 함수
