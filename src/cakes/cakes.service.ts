@@ -84,7 +84,7 @@ export class CakesService {
     const storeNotesFileContent = storeNotesFileData.toString('utf-8');
     const storeNotesJsonData = JSON.parse(storeNotesFileContent);
 
-    cake.cakeOverview.notes = storeNotesJsonData.notes;
+    cake.notes = storeNotesJsonData.notes;
     return cake;
   }
 

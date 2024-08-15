@@ -19,12 +19,6 @@ export class CakesRepository {
         },
       },
       {
-        $unwind: {
-          path: '$likes',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
         $lookup: {
           from: 'stores',
           localField: 'storeId',
@@ -43,12 +37,6 @@ export class CakesRepository {
           localField: 'store._id',
           foreignField: 'storeId',
           as: 'result',
-        },
-      },
-      {
-        $unwind: {
-          path: '$result',
-          preserveNullAndEmptyArrays: true,
         },
       },
       {
@@ -98,7 +86,7 @@ export class CakesRepository {
       },
     ]);
 
-    return { todays };
+    return todays;
   }
 
   // 카테고리별 케이크 데이터를 가져오는 함수
@@ -125,12 +113,6 @@ export class CakesRepository {
           localField: '_id',
           foreignField: 'cakeId',
           as: 'result',
-        },
-      },
-      {
-        $unwind: {
-          path: '$result',
-          preserveNullAndEmptyArrays: true,
         },
       },
       {
@@ -181,17 +163,15 @@ export class CakesRepository {
       {
         $project: {
           _id: 0,
-          cake: {
-            id: '$_id',
-            photo: { $arrayElemAt: ['$photos', 0] },
-            isLiked: {
-              $cond: {
-                if: {
-                  $eq: ['$result.userId', new ObjectId(uid)],
-                },
-                then: true,
-                else: false,
+          id: '$_id',
+          photo: { $arrayElemAt: ['$photos', 0] },
+          isLiked: {
+            $cond: {
+              if: {
+                $eq: ['$result.userId', new ObjectId(uid)],
               },
+              then: true,
+              else: false,
             },
           },
         },
@@ -224,12 +204,6 @@ export class CakesRepository {
           localField: '_id',
           foreignField: 'cakeId',
           as: 'result',
-        },
-      },
-      {
-        $unwind: {
-          path: '$result',
-          preserveNullAndEmptyArrays: true,
         },
       },
       {
@@ -285,18 +259,16 @@ export class CakesRepository {
       {
         $project: {
           _id: 0,
-          cake: {
-            id: '$_id',
-            // photos: 1,
-            photo: { $arrayElemAt: ['$photos', 0] },
-            isLiked: {
-              $cond: {
-                if: {
-                  $eq: ['$result.userId', new ObjectId(uid)],
-                },
-                then: true,
-                else: false,
+          id: '$_id',
+          // photos: 1,
+          photo: { $arrayElemAt: ['$photos', 0] },
+          isLiked: {
+            $cond: {
+              if: {
+                $eq: ['$result.userId', new ObjectId(uid)],
               },
+              then: true,
+              else: false,
             },
           },
         },
@@ -309,7 +281,7 @@ export class CakesRepository {
       },
     ]);
 
-    return { recommendCakes };
+    return recommendCakes;
   }
 
   async getCakeByIdData(
@@ -338,12 +310,6 @@ export class CakesRepository {
         },
       },
       {
-        $unwind: {
-          path: '$result',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
         $lookup: {
           from: 'stores',
           localField: 'storeId',
@@ -362,12 +328,6 @@ export class CakesRepository {
           localField: 'store._id',
           foreignField: 'storeId',
           as: 'storeLikes',
-        },
-      },
-      {
-        $unwind: {
-          path: '$storeLikes',
-          preserveNullAndEmptyArrays: true,
         },
       },
       {
@@ -474,7 +434,7 @@ export class CakesRepository {
       },
     ]);
 
-    return { cakeOverview: { ...cake[0], recommendedCakes: recommendedCakes } };
+    return { ...cake[0], recommendedCakes };
   }
 
   async getCakesByIdData(uid: string, cakeIds: string[]): Promise<any> {
@@ -493,32 +453,24 @@ export class CakesRepository {
         },
       },
       {
-        $unwind: {
-          path: '$result',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
         $project: {
           _id: 0,
-          cake: {
-            id: '$_id',
-            photo: { $arrayElemAt: ['$photos', 0] },
-            isLiked: {
-              $cond: {
-                if: {
-                  $eq: ['$result.userId', new ObjectId(uid)],
-                },
-                then: true,
-                else: false,
+          id: '$_id',
+          photo: { $arrayElemAt: ['$photos', 0] },
+          isLiked: {
+            $cond: {
+              if: {
+                $eq: ['$result.userId', new ObjectId(uid)],
               },
+              then: true,
+              else: false,
             },
           },
         },
       },
     ]);
 
-    return { cakes };
+    return cakes;
   }
 
   async getCategories(categoryListJsonData: any): Promise<any> {
