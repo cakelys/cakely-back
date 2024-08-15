@@ -1,18 +1,5 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Req,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -33,16 +20,13 @@ export class UsersController {
   //   return this.usersService.signIn(accessToken); //request.userId
   // }
 
-  // // 사용자 정보 가져오기
-  // // @UseGuards(AuthGuard)
-  // // @ApiBearerAuth('authorization')
-  // @Get()
-  // async getInfo(@Req() request) {
-  //   const accessToken = request.headers['authorization'];
-  //   const result = await this.usersService.getInfo(accessToken);
-  //   if (typeof result === 'string') {
-  //     return new HttpException(result, HttpStatus.INTERNAL_SERVER_ERROR);
-  //   }
-  //   return result;
-  // }
+  // 사용자 정보 가져오기
+  // @UseGuards(AuthGuard)
+  // @ApiBearerAuth('authorization')
+  @Get('my')
+  async getUserInfo() {
+    const uid = '665f134a0dfff9c6393100d5';
+    const result = await this.usersService.getUserInfo(uid);
+    return result;
+  }
 }

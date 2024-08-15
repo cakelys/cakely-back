@@ -20,4 +20,4 @@ export class User extends Document {
   status: string; // '탈퇴' or '가입' or '차단'
 }
 
-export const UserSchema = SchemaFactory.createForClass(User);
+export const UsersSchema = SchemaFactory.createForClass(User);

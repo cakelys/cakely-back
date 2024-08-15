@@ -9,6 +9,7 @@ import { LikesModule } from './likes/likes.module';
 // import { UsersModule } from './users/users.module';
 // import { AuthModule } from './auth/auth.module';
 import { S3Module } from './s3/s3.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -22,7 +23,7 @@ import { S3Module } from './s3/s3.module';
       dbName: process.env.MONGODB_DBNAME,
     }),
     S3Module,
-    // UsersModule,
+    UsersModule,
     // AuthModule,
   ],
   controllers: [AppController],
