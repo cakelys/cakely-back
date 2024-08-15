@@ -1,14 +1,24 @@
-import { Injectable } from '@nestjs/common';
+import { CreateUserDto } from './dto/create-user.dto';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { FirebaseService } from 'src/auth/firebase.service';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersRepository {
-  constructor(@InjectModel('User') private readonly userModel: Model<any>) {}
+  constructor(
+    @InjectModel(User.name) private readonly userModel: Model<User>,
+    private readonly firebaseService: FirebaseService,
+  ) {}
 
   async getUserInfo(uid: string) {
     const userInfo = await this.userModel.findOne(
-      { _id: uid },
+      { uid: uid },
       {
         _id: 0,
         nickname: 1,
@@ -17,8 +27,67 @@ export class UsersRepository {
         profileImage: 1,
         pushNotification: 1,
         adNotification: 1,
+        photo: 1,
       },
     );
     return userInfo;
+  }
+
+  async logIn(uid: string) {
+    const userInfo = await this.userModel.findOne(
+      { uid: uid },
+      {
+        _id: 0,
+        nickname: 1,
+        account: 1,
+        platform: 1,
+        profileImage: 1,
+        pushNotification: 1,
+        adNotification: 1,
+        status: 1,
+      },
+    );
+    if (!userInfo) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (userInfo.status === '탈퇴') {
+      throw new ForbiddenException('This user has been withdrawn');
+    }
+  }
+
+  async signIn(accessToken) {
+    const firebaseUser = await this.firebaseService.getUserInfoByAccessToken(
+      accessToken,
+    );
+    if (firebaseUser === 'Invalid token') {
+      return '유효하지 않은 토큰입니다.';
+    }
+    // 탈퇴한 유저인지 확인 -> 회원가입을 할 수 없게 한다.
+    const userInfo = await this.userModel.findOne(
+      { uid: firebaseUser['uid'] },
+      { _id: 0, status: 1 }, // 원하는 필드만 가져오기
+    );
+    if (userInfo) {
+      if (userInfo.status === '탈퇴') {
+        return '탈퇴한 회원입니다.';
+      } else {
+        return '이미 가입된 이메일입니다.';
+      }
+    }
+
+    const createUserDto: CreateUserDto = {
+      uid: firebaseUser['uid'],
+      nickname: firebaseUser['nickname'],
+      account: firebaseUser['account'],
+      platform: firebaseUser['platform'],
+      photo: firebaseUser['photo'],
+      pushNotification: false,
+      adNotification: false,
+      status: '활동',
+    };
+
+    const newUser = new this.userModel(createUserDto);
+    await newUser.save();
   }
 }

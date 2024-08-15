@@ -8,14 +8,14 @@ import { CreateStoreLikeDto } from './dto/create-store-like.dto';
 @Injectable()
 export class LikesRepository {
   constructor(
-    @InjectModel('StoreLike') private readonly StoreLikeModel: Model<any>,
-    @InjectModel('CakeLike') private readonly CakeLikeModel: Model<any>,
-    @InjectModel('Cake') private readonly CakeModel: Model<any>,
-    @InjectModel('Store') private readonly StoreModel: Model<any>,
+    @InjectModel('StoreLike') private readonly storeLikeModel: Model<any>,
+    @InjectModel('CakeLike') private readonly cakeLikeModel: Model<any>,
+    @InjectModel('Cake') private readonly cakeModel: Model<any>,
+    @InjectModel('Store') private readonly storeModel: Model<any>,
   ) {}
 
   async getNewCakesInLikedStores(uid: string) {
-    const newCakesInLikedStores = await this.StoreLikeModel.aggregate([
+    const newCakesInLikedStores = await this.storeLikeModel.aggregate([
       {
         $match: {
           userId: new ObjectId(uid),
@@ -100,7 +100,7 @@ export class LikesRepository {
     const pageSize = 10; // 한 페이지에 표시할 항목 수
     const skip = (page - 1) * pageSize; // 페이지 번호에 따라 스킵할 항목 수 계산
 
-    const allLikedStores = await this.StoreLikeModel.aggregate([
+    const allLikedStores = await this.storeLikeModel.aggregate([
       {
         $match: {
           userId: new ObjectId(uid),
@@ -213,7 +213,7 @@ export class LikesRepository {
     const pageSize = 10; // 한 페이지에 표시할 항목 수
     const skip = (page - 1) * pageSize; // 페이지 번호에 따라 스킵할 항목 수 계산
 
-    const allLikedCakes = await this.CakeLikeModel.aggregate([
+    const allLikedCakes = await this.cakeLikeModel.aggregate([
       {
         $match: {
           userId: new ObjectId(uid),
@@ -327,13 +327,13 @@ export class LikesRepository {
 
   async createCakeLike(createCakeLikeDto: CreateCakeLikeDto) {
     // 존재하는 케이크인지 체크
-    const cake = await this.CakeModel.findById(createCakeLikeDto.cakeId);
+    const cake = await this.cakeModel.findById(createCakeLikeDto.cakeId);
     if (!cake) {
       throw new NotFoundException('Invalid cake id');
     }
 
     // like 중복 체크
-    const isExist = await this.CakeLikeModel.findOne({
+    const isExist = await this.cakeLikeModel.findOne({
       userId: createCakeLikeDto.userId,
       cakeId: createCakeLikeDto.cakeId,
     });
@@ -342,7 +342,7 @@ export class LikesRepository {
       throw new NotFoundException('Already liked');
     }
 
-    const newLike = new this.CakeLikeModel(createCakeLikeDto);
+    const newLike = new this.cakeLikeModel(createCakeLikeDto);
     await newLike.save();
 
     return new CreateCakeLikeDto(newLike.userId, newLike.cakeId, newLike._id);
@@ -350,13 +350,13 @@ export class LikesRepository {
 
   async createStoreLike(createStoreLikeDto: CreateStoreLikeDto) {
     // 존재하는 store인지 체크
-    const store = await this.StoreModel.findById(createStoreLikeDto.storeId);
+    const store = await this.storeModel.findById(createStoreLikeDto.storeId);
     if (!store) {
       throw new NotFoundException('Invalid store id');
     }
 
     // like 중복 체크
-    const isExist = await this.StoreLikeModel.findOne({
+    const isExist = await this.storeLikeModel.findOne({
       userId: createStoreLikeDto.userId,
       storeId: createStoreLikeDto.storeId,
     });
@@ -365,7 +365,7 @@ export class LikesRepository {
       throw new NotFoundException('Already liked');
     }
 
-    const newLike = new this.StoreLikeModel(createStoreLikeDto);
+    const newLike = new this.storeLikeModel(createStoreLikeDto);
     await newLike.save();
 
     return new CreateStoreLikeDto(newLike.userId, newLike.storeId, newLike._id);
@@ -373,12 +373,12 @@ export class LikesRepository {
 
   async deleteCakeLike(uid: string, cakeId: string) {
     // 케이크 존재 확인
-    const cake = await this.CakeModel.findById(cakeId);
+    const cake = await this.cakeModel.findById(cakeId);
     if (!cake) {
       throw new NotFoundException('Cake not found');
     }
 
-    const deletedCakeLike = await this.CakeLikeModel.deleteOne({
+    const deletedCakeLike = await this.cakeLikeModel.deleteOne({
       userId: new ObjectId(uid),
       cakeId: new ObjectId(cakeId),
     });
@@ -390,12 +390,12 @@ export class LikesRepository {
 
   async deleteStoreLike(uid: string, storeId: string) {
     // store 존재 확인
-    const store = await this.StoreModel.findById(storeId);
+    const store = await this.storeModel.findById(storeId);
     if (!store) {
       throw new NotFoundException('Store not found');
     }
 
-    const deletedStoreLike = await this.StoreLikeModel.deleteOne({
+    const deletedStoreLike = await this.storeLikeModel.deleteOne({
       userId: new ObjectId(uid),
       storeId: new ObjectId(storeId),
     });

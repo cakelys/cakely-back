@@ -1,23 +1,41 @@
-import { SchemaFactory, Schema } from '@nestjs/mongoose';
+import { SchemaFactory, Schema, Prop } from '@nestjs/mongoose';
+import { ObjectId } from 'mongodb';
 import { Document } from 'mongoose';
 
-@Schema({ timestamps: true, collection: 'users' })
+@Schema({ collection: 'users' })
 export class User extends Document {
+  @Prop({ type: ObjectId })
+  id: string;
+
+  @Prop({ type: String, required: true })
   account: string;
 
+  @Prop({ type: String, required: true })
   platform: string;
 
+  @Prop({ type: Date, default: Date.now })
   createdDate: Date;
 
+  @Prop({ type: Date, default: Date.now })
   modifiedDate: Date;
 
+  @Prop({ type: String })
   nickname: string;
 
-  pushNotification: string;
+  @Prop({ type: Boolean })
+  pushNotification: boolean;
 
-  adNotification: string;
+  @Prop({ type: Boolean })
+  adNotification: boolean;
 
-  status: string; // '탈퇴' or '가입' or '차단'
+  @Prop({ type: String })
+  status: string; // '탈퇴' or '활동' or '차단'
+
+  @Prop({ type: String })
+  photo: string;
+
+  @Prop({ type: String, required: true })
+  uid: string;
 }
 
 export const UsersSchema = SchemaFactory.createForClass(User);

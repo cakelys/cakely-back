@@ -1,22 +1,32 @@
-import { IsEmail, IsString, Matches } from 'class-validator';
+import { IsEmail, IsString } from 'class-validator';
 
 export class AuthGetUserInfoDto {
-  constructor(uid: string, email: string, userName: string, userImage: string) {
+  constructor(
+    uid: string,
+    account: string,
+    nickname: string,
+    photo: string,
+    platform,
+  ) {
     this.uid = uid;
-    this.email = email;
-    this.userName = userName;
-    this.userImage = userImage;
+    this.account = account;
+    this.nickname = nickname;
+    this.photo = photo;
+    this.platform = platform;
   }
 
   @IsString()
   uid: string;
 
   @IsEmail()
-  email: string;
+  account: string;
 
   @IsString()
-  userName: string;
+  nickname: string;
 
   @IsString()
-  userImage: string;
+  photo: string;
+
+  @IsString()
+  platform: string;
 }

@@ -25,6 +25,9 @@ jobs:
           echo "MONGODB_DBNAME=${{ secrets.MONGODB_DBNAME_PROD }}" >> .env
           echo "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}" >> .env
           echo "S3_REGION=${{ secrets.S3_REGION }}" >> .env
+          echo "FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}" >> .env
+          echo "FIREBASE_PRIVATE_KEY=${{ secrets.FIREBASE_PRIVATE_KEY }}" >> .env
+          echo "FIREBASE_CLIENT_EMAIL=${{ secrets.FIREBASE_CLIENT_EMAIL }}" >> .env
       - name: Display .env file
         run: cat .env
       - name: serverless deploy

@@ -8,4 +8,12 @@ export class UsersService {
     const userInfo = await this.usersRepository.getUserInfo(uid);
     return userInfo;
   }
+
+  async logIn(uid: string) {
+    return this.usersRepository.logIn(uid);
+  }
+
+  async signIn(accessToken: string) {
+    return this.usersRepository.signIn(accessToken);
+  }
 }
