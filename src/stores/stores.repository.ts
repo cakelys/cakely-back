@@ -336,39 +336,31 @@ export class StoresRepository {
         },
       },
       {
-        $unwind: {
-          path: '$result',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
         $project: {
           _id: 0,
-          cake: {
-            id: '$cakes._id',
-            // photos: '$cakes.photos',
-            photo: { $arrayElemAt: ['$cakes.photos', 0] },
-            createdDate: '$cakes.createdDate',
-            isLiked: {
-              $cond: {
-                if: {
-                  $eq: ['$result.userId', new ObjectId(uid)],
-                },
-                then: true,
-                else: false,
+          id: '$cakes._id',
+          // photos: '$cakes.photos',
+          photo: { $arrayElemAt: ['$cakes.photos', 0] },
+          createdDate: '$cakes.createdDate',
+          isLiked: {
+            $cond: {
+              if: {
+                $eq: ['$result.userId', new ObjectId(uid)],
               },
+              then: true,
+              else: false,
             },
           },
         },
       },
       {
         $sort: {
-          'cake.createdDate': -1,
+          createdDate: -1,
         },
       },
       {
         $project: {
-          'cake.createdDate': 0,
+          createdDate: 0,
         },
       },
       { $skip: skip },
@@ -379,7 +371,7 @@ export class StoresRepository {
       throw new NotFoundException('해당 스토어의 케이크를 찾을 수 없습니다.');
     }
 
-    return { storeCakes };
+    return storeCakes;
   }
 
   async getStoreCake(
@@ -409,12 +401,6 @@ export class StoresRepository {
         },
       },
       {
-        $unwind: {
-          path: '$result',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
         $lookup: {
           from: 'stores',
           localField: 'storeId',
@@ -438,12 +424,6 @@ export class StoresRepository {
           localField: 'store._id',
           foreignField: 'storeId',
           as: 'storeLikes',
-        },
-      },
-      {
-        $unwind: {
-          path: '$storeLikes',
-          preserveNullAndEmptyArrays: true,
         },
       },
       {
@@ -544,12 +524,6 @@ export class StoresRepository {
         },
       },
       {
-        $unwind: {
-          path: '$result',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
         $project: {
           _id: 0,
           cake: {
@@ -574,7 +548,7 @@ export class StoresRepository {
       },
     ]);
 
-    return { cakeOverview: { ...cake[0], recommendedCakes: recommendedCakes } };
+    return { ...cake[0], recommendedCakes: recommendedCakes };
   }
 
   async getStoreDetails(
@@ -592,33 +566,31 @@ export class StoresRepository {
       {
         $project: {
           _id: 0,
-          storeDetails: {
-            id: '$_id',
-            address: '$address',
-            latitude: '$latitude',
-            longitude: '$longitude',
-            info: '$info',
-            // 거리 계산
-            distance: {
-              $multiply: [
-                6371, // 지구 반지름 (킬로미터 단위)
-                {
-                  $sqrt: {
-                    $add: [
-                      {
-                        $pow: [{ $subtract: ['$latitude', userLatitude] }, 2],
-                      },
-                      {
-                        $pow: [{ $subtract: ['$longitude', userLongitude] }, 2],
-                      },
-                    ],
-                  },
+          id: '$_id',
+          address: '$address',
+          latitude: '$latitude',
+          longitude: '$longitude',
+          info: '$info',
+          // 거리 계산
+          distance: {
+            $multiply: [
+              6371, // 지구 반지름 (킬로미터 단위)
+              {
+                $sqrt: {
+                  $add: [
+                    {
+                      $pow: [{ $subtract: ['$latitude', userLatitude] }, 2],
+                    },
+                    {
+                      $pow: [{ $subtract: ['$longitude', userLongitude] }, 2],
+                    },
+                  ],
                 },
-              ],
-            },
-            sizes: '$sizes',
-            shapes: '$shapes',
+              },
+            ],
           },
+          sizes: '$sizes',
+          shapes: '$shapes',
         },
       },
     ]);
@@ -626,6 +598,5 @@ export class StoresRepository {
     if (storeDetails.length <= 0) {
       throw new NotFoundException('해당 스토어의 정보를 찾을 수 없습니다.');
     }
-    return storeDetails[0];
   }
 }

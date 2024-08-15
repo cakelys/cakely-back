@@ -3,10 +3,14 @@ import { setSortCriteria } from 'src/utils/validation-utils';
 import { StoresRepository } from './stores.repository';
 import * as fs from 'fs';
 import * as path from 'path';
+import { S3Service } from 'src/s3/s3.service';
 
 @Injectable()
 export class StoresService {
-  constructor(private readonly storesRepository: StoresRepository) {}
+  constructor(
+    private readonly storesRepository: StoresRepository,
+    private readonly s3Service: S3Service,
+  ) {}
 
   // 전체 store 리스트 가져오기
   async getAllStores(
@@ -70,10 +74,12 @@ export class StoresService {
       userLongitudeNumber,
     );
 
-    const filePath = path.join(__dirname, '../../data/store-notes.json');
-    const storeNotes = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    storeCake.cakeOverview.notes = storeNotes.notes;
+    const key = 'app-data/store-notes.json';
+    const storeNotesFileData = await this.s3Service.getFile(key);
+    const storeNotesFileContent = storeNotesFileData.toString('utf-8');
+    const storeNotesJsonData = JSON.parse(storeNotesFileContent);
 
+    storeCake.notes = storeNotesJsonData.notes;
     return storeCake;
   }
 
