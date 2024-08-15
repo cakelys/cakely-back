@@ -1,8 +1,10 @@
 import { CreateUserDto } from './dto/create-user.dto';
 import {
-  ForbiddenException,
+  ConflictException,
+  GoneException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -52,7 +54,7 @@ export class UsersRepository {
     }
 
     if (userInfo.status === '탈퇴') {
-      throw new ForbiddenException('This user has been withdrawn');
+      throw new GoneException('This user has been withdrawn');
     }
   }
 
@@ -61,7 +63,7 @@ export class UsersRepository {
       accessToken,
     );
     if (firebaseUser === 'Invalid token') {
-      return '유효하지 않은 토큰입니다.';
+      throw new UnauthorizedException('Invalid token');
     }
     // 탈퇴한 유저인지 확인 -> 회원가입을 할 수 없게 한다.
     const userInfo = await this.userModel.findOne(
@@ -70,9 +72,9 @@ export class UsersRepository {
     );
     if (userInfo) {
       if (userInfo.status === '탈퇴') {
-        return '탈퇴한 회원입니다.';
+        throw new GoneException('This user has been withdrawn');
       } else {
-        return '이미 가입된 이메일입니다.';
+        throw new ConflictException('This email is already in use');
       }
     }
 
