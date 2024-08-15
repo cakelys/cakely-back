@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { setSortCriteria } from 'src/utils/validation-utils';
 import { StoresRepository } from './stores.repository';
-import * as fs from 'fs';
-import * as path from 'path';
 import { S3Service } from 'src/s3/s3.service';
 
 @Injectable()

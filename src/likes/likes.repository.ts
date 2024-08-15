@@ -68,12 +68,6 @@ export class LikesRepository {
         },
       },
       {
-        $unwind: {
-          path: '$cakeLikes',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
         $project: {
           _id: 0,
           'store.id': '$store._id',
@@ -82,12 +76,18 @@ export class LikesRepository {
           cake: {
             id: '$cakes._id',
             photo: { $arrayElemAt: ['$cakes.photos', 0] },
-            isLiked: { $cond: { if: '$cakeLikes', then: true, else: false } },
+            isLiked: {
+              $cond: {
+                if: { $arrayElemAt: ['$cakeLikes', 0] },
+                then: true,
+                else: false,
+              },
+            },
           },
         },
       },
     ]);
-    return { newCakes: newCakesInLikedStores };
+    return newCakesInLikedStores;
   }
 
   async getAllLikedStores(
@@ -200,7 +200,7 @@ export class LikesRepository {
       { $limit: pageSize },
     ]);
 
-    return { likedStores: allLikedStores };
+    return allLikedStores;
   }
 
   async getAllLikedCakes(
@@ -309,22 +309,20 @@ export class LikesRepository {
       {
         $project: {
           _id: 0,
-          cake: {
-            id: '$cake._id',
-            photo: { $arrayElemAt: ['$cake.photos', 0] },
-          },
+          id: '$cake._id',
+          photo: { $arrayElemAt: ['$cake.photos', 0] },
         },
       },
       {
         $addFields: {
-          'cake.isFavorite': true,
+          isFavorite: true,
         },
       },
       { $skip: skip },
       { $limit: pageSize },
     ]);
 
-    return { likedCakes: allLikedCakes };
+    return allLikedCakes;
   }
 
   async createCakeLike(createCakeLikeDto: CreateCakeLikeDto) {
