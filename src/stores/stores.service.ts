@@ -98,4 +98,16 @@ export class StoresService {
     );
     return storeDetails;
   }
+
+  async getNearbyStores(uid: string, latitude: string, longitude: string) {
+    const userLatitude = parseFloat(latitude);
+    const userLongitude = parseFloat(longitude);
+
+    const nearbyStores = await this.storesRepository.getNearbyStores(
+      uid,
+      userLatitude,
+      userLongitude,
+    );
+    return nearbyStores;
+  }
 }

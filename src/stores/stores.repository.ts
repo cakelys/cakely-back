@@ -96,7 +96,7 @@ export class StoresRepository {
           isLiked: {
             $first: {
               $cond: {
-                if: { $eq: ['$storeLikes.userId', uid] },
+                if: { $eq: ['$storeLikes.userId', new ObjectId(uid)] },
                 then: true,
                 else: false,
               },
@@ -109,7 +109,7 @@ export class StoresRepository {
               isLiked: {
                 $cond: {
                   if: {
-                    $in: [uid, '$cakeLikes.userId'],
+                    $in: [new ObjectId(uid), '$cakeLikes.userId'],
                   },
                   then: true,
                   else: false,
@@ -231,7 +231,7 @@ export class StoresRepository {
           isLiked: {
             $first: {
               $cond: {
-                if: { $eq: ['$storeLikes.userId', uid] },
+                if: { $eq: ['$storeLikes.userId', new ObjectId(uid)] },
                 then: true,
                 else: false,
               },
@@ -244,7 +244,7 @@ export class StoresRepository {
               isLiked: {
                 $cond: {
                   if: {
-                    $in: [uid, '$cakeLikes.userId'],
+                    $in: [new ObjectId(uid), '$cakeLikes.userId'],
                   },
                   then: true,
                   else: false,
@@ -598,5 +598,138 @@ export class StoresRepository {
     if (storeDetails.length <= 0) {
       throw new NotFoundException('해당 스토어의 정보를 찾을 수 없습니다.');
     }
+  }
+
+  // 반경 5km 이내의 가게 리스트 가져오기
+  async getNearbyStores(
+    uid: string,
+    userLatitude: number,
+    userLongitude: number,
+  ) {
+    const maxDistanceInKm = 5;
+    const earthRadiusInKm = 6371;
+
+    const nearbyStores = this.storeModel.aggregate([
+      {
+        $addFields: {
+          distance: {
+            $multiply: [
+              earthRadiusInKm, // 지구 반지름 (킬로미터 단위)
+              {
+                $sqrt: {
+                  $add: [
+                    {
+                      $pow: [{ $subtract: ['$latitude', userLatitude] }, 2],
+                    },
+                    {
+                      $pow: [{ $subtract: ['$longitude', userLongitude] }, 2],
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: 'storeLikes',
+          localField: '_id',
+          foreignField: 'storeId',
+          as: 'storeLikes',
+        },
+      },
+      {
+        $unwind: {
+          path: '$storeLikes',
+        },
+      },
+      // 케이크 가져오기
+      {
+        $lookup: {
+          from: 'cakes',
+          localField: '_id',
+          foreignField: 'storeId',
+          as: 'cakes',
+        },
+      },
+      // 케이크 데이터 그룹화
+      {
+        $unwind: {
+          path: '$cakes',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: 'cakeLikes',
+          localField: 'cakes._id',
+          foreignField: 'cakeId',
+          as: 'cakeLikes',
+        },
+      },
+      {
+        $group: {
+          _id: {
+            storeId: '$_id',
+            name: '$name',
+            address: '$address',
+            logo: '$logo',
+            distance: '$distance',
+            popularity: '$popularity',
+            createdDate: '$createdDate',
+            latitude: '$latitude',
+            longitude: '$longitude',
+          },
+          isLiked: {
+            $first: {
+              $cond: {
+                if: { $eq: ['$storeLikes.userId', new ObjectId(uid)] },
+                then: true,
+                else: false,
+              },
+            },
+          },
+          popularCakes: {
+            $push: {
+              id: '$cakes._id',
+              photo: { $arrayElemAt: ['$cakes.photos', 0] },
+              isLiked: {
+                $cond: {
+                  if: {
+                    $in: [new ObjectId(uid), '$cakeLikes.userId'],
+                  },
+                  then: true,
+                  else: false,
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        $match: {
+          '_id.distance': { $lte: maxDistanceInKm },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          store: {
+            id: '$_id.storeId',
+            name: '$_id.name',
+            address: '$_id.address',
+            logo: '$_id.logo',
+            distance: '$_id.distance',
+            isLiked: '$isLiked',
+            latitude: '$_id.latitude',
+            longitude: '$_id.longitude',
+          },
+          popularCakes: 1,
+        },
+      },
+    ]);
+
+    return nearbyStores;
   }
 }

@@ -32,6 +32,10 @@ export class UsersRepository {
         photo: 1,
       },
     );
+
+    if (!userInfo) {
+      throw new NotFoundException('User not found');
+    }
     return userInfo;
   }
 

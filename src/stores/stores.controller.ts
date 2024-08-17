@@ -37,6 +37,17 @@ export class StoresController {
     return this.storesService.getAllStores(uid, defaultSortBy, page);
   }
 
+  // 가까운 스토어 가져오기
+  @Get('nearby')
+  getNearbyStores(
+    @Query('latitude') latitude: string,
+    @Query('longitude') longitude: string,
+  ) {
+    const uid = '665f134a0dfff9c6393100d5';
+    validateCoordinates(latitude, longitude);
+    return this.storesService.getNearbyStores(uid, latitude, longitude);
+  }
+
   // 하나 store 가져오기
   @Get(':storeId')
   getStore(@Param('storeId') storeId: string) {
