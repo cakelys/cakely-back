@@ -526,17 +526,15 @@ export class StoresRepository {
       {
         $project: {
           _id: 0,
-          cake: {
-            id: '$cakes._id',
-            photo: { $arrayElemAt: ['$cakes.photos', 0] },
-            isLiked: {
-              $cond: {
-                if: {
-                  $eq: ['$result.userId', new ObjectId(uid)],
-                },
-                then: true,
-                else: false,
+          id: '$cakes._id',
+          photo: { $arrayElemAt: ['$cakes.photos', 0] },
+          isLiked: {
+            $cond: {
+              if: {
+                $eq: ['$result.userId', new ObjectId(uid)],
               },
+              then: true,
+              else: false,
             },
           },
         },
@@ -598,6 +596,8 @@ export class StoresRepository {
     if (storeDetails.length <= 0) {
       throw new NotFoundException('해당 스토어의 정보를 찾을 수 없습니다.');
     }
+
+    return storeDetails[0];
   }
 
   // 반경 5km 이내의 가게 리스트 가져오기

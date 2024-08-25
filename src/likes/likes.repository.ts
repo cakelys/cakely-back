@@ -182,18 +182,16 @@ export class LikesRepository {
       {
         $project: {
           _id: 0,
-          store: {
-            id: '$store._id',
-            name: '$store.name',
-            address: '$store.address',
-            distance: '$distance',
-            logo: '$store.logo',
-          },
+          id: '$store._id',
+          name: '$store.name',
+          address: '$store.address',
+          distance: '$distance',
+          logo: '$store.logo',
         },
       },
       {
         $addFields: {
-          'store.isLiked': true,
+          isLiked: true,
         },
       },
       { $skip: skip },
