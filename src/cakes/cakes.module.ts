@@ -5,10 +5,14 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Cake, CakeSchema } from './entities/cake.entity';
 import { CakesRepository } from './cakes.repository';
 import { S3Service } from 'src/s3/s3.service';
+import { Store, StoreSchema } from 'src/stores/entities/store.entity';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Cake.name, schema: CakeSchema }]),
+    MongooseModule.forFeature([
+      { name: Cake.name, schema: CakeSchema },
+      { name: Store.name, schema: StoreSchema },
+    ]),
   ],
   controllers: [CakesController],
   providers: [CakesService, CakesRepository, S3Service],

@@ -2,10 +2,15 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
+import { Store } from 'src/stores/entities/store.entity';
+import { Cake } from './entities/cake.entity';
 
 @Injectable()
 export class CakesRepository {
-  constructor(@InjectModel('Cake') private readonly cakeModel: Model<any>) {}
+  constructor(
+    @InjectModel('Cake') private readonly cakeModel: Model<Cake>,
+    @InjectModel('Store') private readonly storeModel: Model<Store>,
+  ) {}
 
   // 오늘의 케이크 데이터를 가져오는 함수
   async getTodayCakesData(uid: string): Promise<any> {
@@ -524,5 +529,20 @@ export class CakesRepository {
   // 케이크 데이터를 삭제하는 함수
   async deleteCake(cakeId: string): Promise<any> {
     return this.cakeModel.findByIdAndDelete(cakeId).exec();
+  }
+
+  async createCake(createCakeDto: any) {
+    // instarId로 storeId 찾기
+    const storeInstarId = createCakeDto['storeInstarId'];
+    const store = await this.storeModel.findOne({ instarId: storeInstarId });
+
+    if (!store) {
+      throw new NotFoundException('가게를 찾을 수 없습니다.');
+    }
+
+    createCakeDto['storeId'] = store._id;
+
+    const newCake = await this.cakeModel.create(createCakeDto);
+    return newCake;
   }
 }

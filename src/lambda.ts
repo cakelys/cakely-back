@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as admin from 'firebase-admin';
 import { initializeApp } from 'firebase-admin/app';
+import { ValidationPipe } from '@nestjs/common';
 
 let cachedServer;
 
@@ -11,6 +12,14 @@ export const handler = async (event, context) => {
     console.log(event);
     const nestApp = await NestFactory.create(AppModule);
     nestApp.enableCors();
+
+    nestApp.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
+    );
 
     // firebase 연결 부분
     initializeApp({

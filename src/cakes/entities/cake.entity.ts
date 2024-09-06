@@ -2,7 +2,10 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ObjectId } from 'mongodb';
 import { Document } from 'mongoose';
 
-@Schema({ timestamps: true, collection: 'cakes' })
+@Schema({
+  timestamps: { createdAt: 'createdDate', updatedAt: '' },
+  collection: 'cakes',
+})
 export class Cake extends Document {
   @Prop({ type: ObjectId })
   id: string;
@@ -21,5 +24,11 @@ export class Cake extends Document {
 
   @Prop({})
   createdDate: Date;
+
+  @Prop({ required: true })
+  faiss_id: string;
+
+  @Prop({ required: true })
+  photos: string[];
 }
 export const CakeSchema = SchemaFactory.createForClass(Cake);

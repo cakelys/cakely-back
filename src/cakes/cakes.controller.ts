@@ -6,6 +6,7 @@ import {
   validateRequiredField,
   validateSortBy,
 } from 'src/utils/validation-utils';
+import { CreateCakeDto } from './dto/create-cake.dto';
 
 @Controller('cakes')
 export class CakesController {
@@ -76,6 +77,11 @@ export class CakesController {
       defaultSortBy,
       page,
     );
+  }
+
+  @Post()
+  createCake(@Body() createCakeDto: CreateCakeDto) {
+    return this.cakesService.createCake(createCakeDto);
   }
 
   // 케이크id 리스트 받아서 케이크 리스트 가져오기

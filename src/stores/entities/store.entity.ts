@@ -14,6 +14,9 @@ export class Store extends Document {
   name: string;
 
   @Prop({ type: String })
+  instarId: string;
+
+  @Prop({ type: String })
   address: string;
 
   @Prop({ type: Number })
