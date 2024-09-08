@@ -1,9 +1,9 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class CreateCakeDto {
   @IsNotEmpty()
-  @IsString()
-  faiss_id: string;
+  @IsNumber()
+  faissId: number;
 
   @IsNotEmpty()
   @IsString()

@@ -532,7 +532,6 @@ export class CakesRepository {
   }
 
   async createCake(createCakeDto: any) {
-    // instarId로 storeId 찾기
     const storeInstarId = createCakeDto['storeInstarId'];
     const store = await this.storeModel.findOne({ instarId: storeInstarId });
 

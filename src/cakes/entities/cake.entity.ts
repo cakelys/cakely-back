@@ -26,7 +26,7 @@ export class Cake extends Document {
   createdDate: Date;
 
   @Prop({ required: true })
-  faiss_id: string;
+  faissId: number;
 
   @Prop({ required: true })
   photos: string[];
