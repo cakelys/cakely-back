@@ -17,11 +17,10 @@ export class StoresRepository {
     userLongitude: number,
     page: number,
   ): Promise<any[]> {
-    const pageSize = 10; // 한 페이지에 표시할 항목 수
-    const skip = (page - 1) * pageSize; // 페이지 번호에 따라 스킵할 항목 수 계산
+    const pageSize = 10;
+    const skip = (page - 1) * pageSize;
 
     return this.storeModel.aggregate([
-      // 스토어의 좋아요 정보 가져오기
       {
         $lookup: {
           from: 'storeLikes',
@@ -36,12 +35,11 @@ export class StoresRepository {
           preserveNullAndEmptyArrays: true,
         },
       },
-      // 거리 계산
       {
         $addFields: {
           distance: {
             $multiply: [
-              6371, // 지구 반지름 (킬로미터 단위)
+              6371,
               {
                 $sqrt: {
                   $add: [
@@ -58,7 +56,6 @@ export class StoresRepository {
           },
         },
       },
-      // 케이크 가져오기
       {
         $lookup: {
           from: 'cakes',
@@ -67,7 +64,6 @@ export class StoresRepository {
           as: 'cakes',
         },
       },
-      // 케이크 데이터 그룹화
       {
         $unwind: {
           path: '$cakes',
@@ -129,7 +125,7 @@ export class StoresRepository {
                   sortBy: { popularity: -1 },
                 },
               },
-              10, // 최대 10개
+              10,
             ],
           },
         },
@@ -167,7 +163,6 @@ export class StoresRepository {
   }
 
   async getStoreById(uid: string, storeId: string): Promise<any> {
-    // storeLikes에서 storeId로 검색해서 좋아요 여부 확인
     const store = await this.storeModel.aggregate([
       {
         $match: {
@@ -195,7 +190,6 @@ export class StoresRepository {
           preserveNullAndEmptyArrays: true,
         },
       },
-      // 케이크 가져오기
       {
         $lookup: {
           from: 'cakes',
@@ -204,7 +198,6 @@ export class StoresRepository {
           as: 'cakes',
         },
       },
-      // 케이크 데이터 그룹화
       {
         $unwind: {
           path: '$cakes',
@@ -264,7 +257,7 @@ export class StoresRepository {
                   sortBy: { popularity: -1 },
                 },
               },
-              10, // 최대 10개
+              10,
             ],
           },
         },
@@ -304,8 +297,8 @@ export class StoresRepository {
     storeId: string,
     page: number,
   ): Promise<any> {
-    const pageSize = 10; // 한 페이지에 표시할 항목 수
-    const skip = (page - 1) * pageSize; // 페이지 번호에 따라 스킵할 항목 수 계산
+    const pageSize = 10;
+    const skip = (page - 1) * pageSize;
 
     const storeCakes = await this.storeModel.aggregate([
       {
@@ -339,7 +332,6 @@ export class StoresRepository {
         $project: {
           _id: 0,
           id: '$cakes._id',
-          // photos: '$cakes.photos',
           photo: { $arrayElemAt: ['$cakes.photos', 0] },
           createdDate: '$cakes.createdDate',
           isLiked: {
@@ -397,7 +389,7 @@ export class StoresRepository {
       },
       {
         $addFields: {
-          likesCount: { $size: '$result' }, // Calculate the number of likes
+          likesCount: { $size: '$result' },
         },
       },
       {
@@ -430,7 +422,7 @@ export class StoresRepository {
         $addFields: {
           distance: {
             $multiply: [
-              6371, // Earth radius in kilometers
+              6371,
               {
                 $sqrt: {
                   $add: [
@@ -457,7 +449,6 @@ export class StoresRepository {
         $project: {
           _id: 0,
           cake: {
-            // photos: 1,
             id: '$_id',
             photo: { $arrayElemAt: ['$photos', 0] },
             tags: '$tags',
@@ -569,10 +560,9 @@ export class StoresRepository {
           latitude: '$latitude',
           longitude: '$longitude',
           info: '$info',
-          // 거리 계산
           distance: {
             $multiply: [
-              6371, // 지구 반지름 (킬로미터 단위)
+              6371,
               {
                 $sqrt: {
                   $add: [
@@ -600,7 +590,6 @@ export class StoresRepository {
     return storeDetails[0];
   }
 
-  // 반경 5km 이내의 가게 리스트 가져오기
   async getNearbyStores(
     uid: string,
     userLatitude: number,
@@ -614,7 +603,7 @@ export class StoresRepository {
         $addFields: {
           distance: {
             $multiply: [
-              earthRadiusInKm, // 지구 반지름 (킬로미터 단위)
+              earthRadiusInKm,
               {
                 $sqrt: {
                   $add: [
@@ -644,7 +633,6 @@ export class StoresRepository {
           path: '$storeLikes',
         },
       },
-      // 케이크 가져오기
       {
         $lookup: {
           from: 'cakes',
@@ -653,7 +641,6 @@ export class StoresRepository {
           as: 'cakes',
         },
       },
-      // 케이크 데이터 그룹화
       {
         $unwind: {
           path: '$cakes',

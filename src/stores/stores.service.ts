@@ -10,7 +10,6 @@ export class StoresService {
     private readonly s3Service: S3Service,
   ) {}
 
-  // 전체 store 리스트 가져오기
   async getAllStores(
     uid: string,
     sortBy: string,
@@ -33,11 +32,9 @@ export class StoresService {
     return allStores;
   }
 
-  // 하나 store 가져오기
   async getStoreById(uid: string, storeId: string) {
     const store = await this.storesRepository.getStoreById(uid, storeId);
 
-    // 랜덤으로 popularCakes 배열 중에 케이크 하나 선택해서 photo를 store의 backgroundImage로 설정
     const randomIndex = Math.floor(Math.random() * store.popularCakes.length);
     store.store.backgroundImage = store.popularCakes[randomIndex].photo;
 

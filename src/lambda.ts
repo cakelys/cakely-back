@@ -21,7 +21,6 @@ export const handler = async (event, context) => {
       }),
     );
 
-    // firebase 연결 부분
     initializeApp({
       credential: admin.credential.cert({
         projectId: process.env.FIREBASE_PROJECT_ID,

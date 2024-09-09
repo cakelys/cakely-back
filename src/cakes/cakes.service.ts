@@ -18,7 +18,6 @@ export class CakesService {
     userLatitude?: string,
     userLongitude?: string,
   ) {
-    // 현재는 랜덤으로 케이크 10개 가져온다
     const sortCriteria = setSortCriteria(sortBY);
     const userLatitudeNumber = parseFloat(userLatitude);
     const userLongitudeNumber = parseFloat(userLongitude);
@@ -35,7 +34,6 @@ export class CakesService {
   }
 
   async getTodayCakes(uid: string) {
-    // 최신 순으로 정렬해서 최근 5개 케이크와 해당 케이크 마켓의 정보를 가져온다.
     const todayCakes = await this.cakesRepository.getTodayCakesData(uid);
 
     return todayCakes;

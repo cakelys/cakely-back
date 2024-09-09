@@ -1,6 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
 
-// 유효한 정렬 기준
 const validSortByValues = ['latest', 'popular', 'distance'];
 
 export function validateSortBy(sortBy: string): void {

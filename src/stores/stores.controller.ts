@@ -11,7 +11,6 @@ import {
 export class StoresController {
   constructor(private readonly storesService: StoresService) {}
 
-  // 전체 store 리스트 가져오기
   @Get()
   getAllStores(
     @Query('sortBy') sortBy: string,
@@ -37,7 +36,6 @@ export class StoresController {
     return this.storesService.getAllStores(uid, defaultSortBy, page);
   }
 
-  // 가까운 스토어 가져오기
   @Get('nearby')
   getNearbyStores(
     @Query('latitude') latitude: string,
@@ -48,14 +46,12 @@ export class StoresController {
     return this.storesService.getNearbyStores(uid, latitude, longitude);
   }
 
-  // 하나 store 가져오기
   @Get(':storeId')
   getStore(@Param('storeId') storeId: string) {
     const uid = '665f134a0dfff9c6393100d5';
     return this.storesService.getStoreById(uid, storeId);
   }
 
-  // 스토어의 케이크 가져오기
   @Get(':storeId/cakes')
   getStoreCakes(
     @Param('storeId') storeId: string,
@@ -66,7 +62,6 @@ export class StoresController {
     return this.storesService.getStoreCakes(uid, storeId, page);
   }
 
-  // 스토어의 한 케이크 가져오기
   @Get(':storeId/cakes/:cakeId')
   getStoreCake(
     @Param('storeId') storeId: string,
@@ -87,7 +82,6 @@ export class StoresController {
     return this.storesService.getStoreCake(uid, storeId, cakeId);
   }
 
-  // 스토어의 세부정보 가져오기
   @Get(':storeId/details')
   getStoreDetails(
     @Param('storeId') storeId: string,

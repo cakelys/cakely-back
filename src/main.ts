@@ -15,7 +15,6 @@ async function bootstrap() {
     }),
   );
 
-  // firebase 연결 부분
   initializeApp({
     credential: admin.credential.cert({
       projectId: process.env.FIREBASE_PROJECT_ID,
@@ -24,7 +23,7 @@ async function bootstrap() {
     }),
   });
 
-  // app.use(cookieParser()); // 쿠키 설정
+  // app.use(cookieParser());
 
   await app.listen(3000);
 }

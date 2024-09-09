@@ -10,7 +10,6 @@ export class FirebaseService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<User>,
   ) {}
-  // 토큰을 받으면 firebase에 접근해서 유효한 토큰인지 확인하고 유저의 uid를 반환하는 함수
   async verifyAccessToken(accessToken: string): Promise<string> {
     if (!accessToken.startsWith('Bearer ')) {
       console.log('Invalid token');
@@ -28,14 +27,9 @@ export class FirebaseService {
     }
   }
 
-  // mongodb에서 사용자가 있는지 확인하는 함수
   async validateUser(uid: string): Promise<boolean> {
-    // mongodb에서 uid를 검색해서 있으면 true, 없으면 false를 반환
     const userInfo = await this.userModel
-      .findOne(
-        { uid: uid },
-        { _id: 0, status: 1 }, // 원하는 필드만 가져오기
-      )
+      .findOne({ uid: uid }, { _id: 0, status: 1 })
       .exec();
 
     if (userInfo === null) {
@@ -68,13 +62,10 @@ export class FirebaseService {
     }
   }
 
-  // 사용자 삭제 함수
   async deleteUser(uid: string) {
     try {
       await getAuth().deleteUser(uid);
-      // 사용자 삭제 성공 처리
     } catch (error) {
-      // 사용자 삭제 실패 처리
       console.error('사용자 삭제 실패', error);
     }
   }

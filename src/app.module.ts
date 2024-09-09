@@ -6,8 +6,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import { StoresModule } from './stores/stores.module';
 import { LikesModule } from './likes/likes.module';
-// import { UsersModule } from './users/users.module';
-// import { AuthModule } from './auth/auth.module';
 import { S3Module } from './s3/s3.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';

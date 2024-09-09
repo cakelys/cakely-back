@@ -12,7 +12,6 @@ export class CakesRepository {
     @InjectModel('Store') private readonly storeModel: Model<Store>,
   ) {}
 
-  // 오늘의 케이크 데이터를 가져오는 함수
   async getTodayCakesData(uid: string): Promise<any> {
     const todays = await this.cakeModel.aggregate([
       {
@@ -562,7 +561,6 @@ export class CakesRepository {
   }
 
   async getWorldCupWinnerData(uid: string, cakeId: string) {
-    // 케이크 이미지 데이터와 좋아요 정보, 속한 가게 정보
     const worldCupWinner = await this.cakeModel.aggregate([
       {
         $match: {

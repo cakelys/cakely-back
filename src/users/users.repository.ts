@@ -68,13 +68,13 @@ export class UsersRepository {
     if (firebaseUser === 'Invalid token') {
       throw new UnauthorizedException('Invalid token');
     }
-    // 탈퇴한 유저인지 확인 -> 회원가입을 할 수 없게 한다.
     const userInfo = await this.userModel.findOne(
       { uid: firebaseUser['uid'] },
-      { _id: 0, status: 1 }, // 원하는 필드만 가져오기
+      { _id: 0, status: 1 },
     );
     if (userInfo) {
       if (userInfo.status === '탈퇴') {
+        // [TODO] 탈퇴한지 한달이 넘었는지 확인
         throw new GoneException('This user has been withdrawn');
       } else {
         throw new ConflictException('This email is already in use');

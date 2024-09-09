@@ -11,14 +11,12 @@ import {
 export class LikesController {
   constructor(private readonly likesService: LikesService) {}
 
-  // 찜한 가게의 새로 나온 케이크 리스트 가져오기
   @Get('stores/new-cakes')
   getNewCakesInLikedStores() {
     const uid = '665f134a0dfff9c6393100d5';
     return this.likesService.getNewCakesInLikedStores(uid);
   }
 
-  // 전체 찜 가게 리스트 가져오기
   @Get('stores')
   getAllLikedStore(
     @Query('page') page: string,
@@ -43,7 +41,6 @@ export class LikesController {
     return this.likesService.getAllStoreLikes(uid, defaultSortBy, page);
   }
 
-  // 전체 찜한 케이크 리스트 가져오기
   @Get('cakes')
   getAllLikedCakes(
     @Query('page') page: string,
@@ -74,28 +71,24 @@ export class LikesController {
     );
   }
 
-  // 케이크 찜하기
   @Post('cakes/:cakeId')
   createCakeLike(@Param('cakeId') cakeId: string) {
     const uid = '665f134a0dfff9c6393100d5';
     return this.likesService.createCakeLike(uid, cakeId);
   }
 
-  // 가게 찜하기
   @Post('stores/:storeId')
   createStoreLike(@Param('storeId') storeId: string) {
     const uid = '665f134a0dfff9c6393100d5';
     return this.likesService.createStoreLike(uid, storeId);
   }
 
-  // 케이크 찜 삭제하기
   @Delete('cakes/:cakeId')
   deleteCakeLike(@Param('cakeId') cakeId: string) {
     const uid = '665f134a0dfff9c6393100d5';
     return this.likesService.deleteCakeLike(uid, cakeId);
   }
 
-  // 가게 찜 삭제하기
   @Delete('stores/:storeId')
   deleteStoreLike(@Param('storeId') storeId: string) {
     const uid = '665f134a0dfff9c6393100d5';

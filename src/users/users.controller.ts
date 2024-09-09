@@ -6,7 +6,6 @@ import { AuthGuard } from 'src/auth/auth.guard';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // @ApiBearerAuth('authorization')
   @UseGuards(AuthGuard)
   @Post('login')
   logIn(@Req() request): void {
@@ -14,15 +13,12 @@ export class UsersController {
     this.usersService.logIn(uid);
   }
 
-  // 회원가입
   @Post('signin')
   signIn(@Req() request) {
     const accessToken = request.headers['authorization'];
     return this.usersService.signIn(accessToken);
   }
 
-  // 사용자 정보 가져오기
-  // @ApiBearerAuth('authorization')
   @UseGuards(AuthGuard)
   @Get('my')
   async getUserInfo(@Req() request) {
