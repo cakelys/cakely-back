@@ -12,7 +12,6 @@ import { CreateCakeDto } from './dto/create-cake.dto';
 export class CakesController {
   constructor(private readonly cakesService: CakesService) {}
 
-  // 추천케이크 리스트 가져오기
   @Get('recommend')
   getRecommendCakes(
     @Query('sortBy') sortBy: string,
@@ -38,14 +37,12 @@ export class CakesController {
     return this.cakesService.getRecommendCakes(uid, defaultSortBy, page);
   }
 
-  // 오늘의 케이크 리스트 가져오기
   @Get('today')
   getTodayCakes() {
     const uid = '665f134a0dfff9c6393100d5';
     return this.cakesService.getTodayCakes(uid);
   }
 
-  // 카테고리별 케이크 리스트 가져오기
   @Get()
   getCategoryCakes(
     @Query('category') category: string,
@@ -84,20 +81,17 @@ export class CakesController {
     return this.cakesService.createCake(createCakeDto);
   }
 
-  // 케이크id 리스트 받아서 케이크 리스트 가져오기
   @Post('list')
   getCakesByIdList(@Body('cakeIds') cakeIds: string[]) {
     const uid = '665f134a0dfff9c6393100d5';
     return this.cakesService.getCakesByIds(uid, cakeIds);
   }
 
-  // 케이크 카테고리 리스트 가져오기
   @Get('categories')
   getCategories() {
     return this.cakesService.getCategories();
   }
 
-  // 케이크 상세정보 가져오기
   @Get(':cakeId')
   getCakeById(
     @Param('cakeId') cakeId: string,

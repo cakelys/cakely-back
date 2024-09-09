@@ -11,6 +11,7 @@ import { LikesModule } from './likes/likes.module';
 import { S3Module } from './s3/s3.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { AuthModule } from './auth/auth.module';
     S3Module,
     UsersModule,
     AuthModule,
+    SearchModule,
   ],
   controllers: [AppController],
   providers: [AppService],
