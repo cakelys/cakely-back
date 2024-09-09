@@ -25,7 +25,7 @@ export class Cake extends Document {
   @Prop({})
   createdDate: Date;
 
-  @Prop({ required: true })
+  @Prop({ required: true, index: true })
   faissId: number;
 
   @Prop({ required: true })
