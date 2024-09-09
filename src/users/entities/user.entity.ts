@@ -28,8 +28,8 @@ export class User extends Document {
   @Prop({ type: Boolean })
   adNotification: boolean;
 
-  @Prop({ type: String })
-  status: string; // '탈퇴' or '활동' or '차단'
+  @Prop({ type: String, options: ['탈퇴', '활동', '차단'] })
+  status: string;
 
   @Prop({ type: String })
   photo: string;
