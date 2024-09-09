@@ -28,7 +28,6 @@ export class UsersRepository {
         platform: 1,
         profileImage: 1,
         pushNotification: 1,
-        adNotification: 1,
         photo: 1,
       },
     );
