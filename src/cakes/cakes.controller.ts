@@ -92,6 +92,17 @@ export class CakesController {
     return this.cakesService.getCategories();
   }
 
+  @Get('world-cup')
+  getWorldCupCakes() {
+    return this.cakesService.getWorldCupCakes();
+  }
+
+  @Get('world-cup/:cakeId')
+  getWorldCupWinner(@Param('cakeId') cakeId: string) {
+    const uid = '665f134a0dfff9c6393100d5';
+    return this.cakesService.getWorldCupWinner(uid, cakeId);
+  }
+
   @Get(':cakeId')
   getCakeById(
     @Param('cakeId') cakeId: string,

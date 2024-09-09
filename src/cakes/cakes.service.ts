@@ -116,4 +116,17 @@ export class CakesService {
     const newCake = await this.cakesRepository.createCake(createCakeDto);
     return newCake;
   }
+
+  async getWorldCupCakes() {
+    const worldCupCakes = await this.cakesRepository.getWorldCupCakesData();
+    return worldCupCakes;
+  }
+
+  async getWorldCupWinner(uid: string, cakeId: string) {
+    const worldCupWinner = await this.cakesRepository.getWorldCupWinnerData(
+      uid,
+      cakeId,
+    );
+    return worldCupWinner;
+  }
 }

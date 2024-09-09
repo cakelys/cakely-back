@@ -94,7 +94,6 @@ export class CakesRepository {
     return todays;
   }
 
-  // 카테고리별 케이크 데이터를 가져오는 함수
   async getCakeByCategory(
     uid: string,
     category: string,
@@ -103,8 +102,8 @@ export class CakesRepository {
     userLongitude: number,
     page: number,
   ): Promise<any> {
-    const pageSize = 10; // 한 페이지에 표시할 항목 수
-    const skip = (page - 1) * pageSize; // 페이지 번호에 따라 스킵할 항목 수 계산
+    const pageSize = 10;
+    const skip = (page - 1) * pageSize;
 
     const categoryCakes = await this.cakeModel.aggregate([
       {
@@ -137,7 +136,7 @@ export class CakesRepository {
         $addFields: {
           distance: {
             $multiply: [
-              6371, // Earth radius in kilometers
+              6371,
               {
                 $sqrt: {
                   $add: [
@@ -199,8 +198,8 @@ export class CakesRepository {
     userLongitude: number,
     page: number,
   ): Promise<any> {
-    const pageSize = 10; // 한 페이지에 표시할 항목 수
-    const skip = (page - 1) * pageSize; // 페이지 번호에 따라 스킵할 항목 수 계산
+    const pageSize = 10;
+    const skip = (page - 1) * pageSize;
 
     const recommendCakes = await this.cakeModel.aggregate([
       {
@@ -233,7 +232,7 @@ export class CakesRepository {
         $addFields: {
           distance: {
             $multiply: [
-              6371, // Earth radius in kilometers
+              6371,
               {
                 $sqrt: {
                   $add: [
@@ -265,7 +264,6 @@ export class CakesRepository {
         $project: {
           _id: 0,
           id: '$_id',
-          // photos: 1,
           photo: { $arrayElemAt: ['$photos', 0] },
           isLiked: {
             $cond: {
@@ -311,7 +309,7 @@ export class CakesRepository {
       },
       {
         $addFields: {
-          likesCount: { $size: '$result' }, // Calculate the number of likes
+          likesCount: { $size: '$result' },
         },
       },
       {
@@ -339,7 +337,7 @@ export class CakesRepository {
         $addFields: {
           distance: {
             $multiply: [
-              6371, // Earth radius in kilometers
+              6371,
               {
                 $sqrt: {
                   $add: [
@@ -366,7 +364,6 @@ export class CakesRepository {
         $project: {
           _id: 0,
           cake: {
-            // photos: 1,
             id: '$_id',
             photo: { $arrayElemAt: ['$photos', 0] },
             tags: '$tags',
@@ -406,7 +403,7 @@ export class CakesRepository {
 
     const recommendedCakes = await this.cakeModel.aggregate([
       {
-        $sample: { size: 10 }, // 랜덤으로 10개의 케이크를 샘플링
+        $sample: { size: 10 },
       },
       {
         $lookup: {
@@ -479,7 +476,6 @@ export class CakesRepository {
   }
 
   async getCategories(categoryListJsonData: any): Promise<any> {
-    // 카테고리별 가장 최근 케이크 하나의 photo를 추가
     const categoriesWithPhotos = await Promise.all(
       categoryListJsonData.map(async (category) => {
         const cake = await this.cakeModel.aggregate([
@@ -514,11 +510,6 @@ export class CakesRepository {
     return categoriesWithPhotos;
   }
 
-  // 새 케이크 데이터를 추가하는 함수
-  // async addCake(cakeData: any): Promise<any> {
-  //   const newCake = new this.cakeModel(cakeData);
-  // }
-
   // 케이크 데이터를 업데이트하는 함수
   async updateCake(cakeId: string, updateData: any): Promise<any> {
     return this.cakeModel
@@ -543,5 +534,103 @@ export class CakesRepository {
 
     const newCake = await this.cakeModel.create(createCakeDto);
     return newCake;
+  }
+
+  async getWorldCupCakesData(): Promise<any> {
+    const worldCupCakes = await this.cakeModel.aggregate([
+      {
+        $sample: { size: 8 },
+      },
+      {
+        $lookup: {
+          from: 'cakeLikes',
+          localField: '_id',
+          foreignField: 'cakeId',
+          as: 'likes',
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          id: '$_id',
+          photo: { $arrayElemAt: ['$photos', 0] },
+        },
+      },
+    ]);
+
+    return worldCupCakes;
+  }
+
+  async getWorldCupWinnerData(uid: string, cakeId: string) {
+    // 케이크 이미지 데이터와 좋아요 정보, 속한 가게 정보
+    const worldCupWinner = await this.cakeModel.aggregate([
+      {
+        $match: {
+          _id: new ObjectId(cakeId),
+        },
+      },
+      {
+        $lookup: {
+          from: 'cakeLikes',
+          localField: '_id',
+          foreignField: 'cakeId',
+          as: 'likes',
+        },
+      },
+      {
+        $lookup: {
+          from: 'stores',
+          localField: 'storeId',
+          foreignField: '_id',
+          as: 'store',
+        },
+      },
+      {
+        $unwind: {
+          path: '$store',
+        },
+      },
+      {
+        $lookup: {
+          from: 'storeLikes',
+          localField: 'store._id',
+          foreignField: 'storeId',
+          as: 'result',
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          cake: {
+            id: '$_id',
+            photo: { $arrayElemAt: ['$photos', 0] },
+            isLiked: {
+              $cond: {
+                if: {
+                  $eq: ['$likes.userId', new ObjectId(uid)],
+                },
+                then: true,
+                else: false,
+              },
+            },
+          },
+          'store.isLiked': {
+            $cond: {
+              if: {
+                $eq: ['$result.userId', new ObjectId(uid)],
+              },
+              then: true,
+              else: false,
+            },
+          },
+          'store.id': '$store._id',
+          'store.name': 1,
+          'store.logo': 1,
+          'store.address': 1,
+        },
+      },
+    ]);
+
+    return worldCupWinner;
   }
 }
