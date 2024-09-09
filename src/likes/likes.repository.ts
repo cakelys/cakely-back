@@ -35,10 +35,6 @@ export class LikesRepository {
           preserveNullAndEmptyArrays: true,
         },
       },
-      // 케이크 가게 1개 랜덤 선택
-      {
-        $sample: { size: 1 },
-      },
       {
         $lookup: {
           from: 'cakes',
@@ -57,7 +53,26 @@ export class LikesRepository {
         $sort: { 'cakes.createdDate': -1 },
       },
       {
-        $limit: 6,
+        $group: {
+          _id: '$store._id',
+          store: { $first: '$store' },
+          cakes: { $push: '$cakes' },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          'store.id': '$store._id',
+          'store.name': '$store.name',
+          'store.logo': '$store.logo',
+          cakes: { $slice: ['$cakes', 3] },
+        },
+      },
+      {
+        $unwind: {
+          path: '$cakes',
+          preserveNullAndEmptyArrays: true,
+        },
       },
       {
         $lookup: {
@@ -86,6 +101,9 @@ export class LikesRepository {
           },
         },
       },
+      {
+        $limit: 20,
+      },
     ]);
     return newCakesInLikedStores;
   }
@@ -97,8 +115,8 @@ export class LikesRepository {
     userLongitude: number,
     page: number,
   ): Promise<any> {
-    const pageSize = 10; // 한 페이지에 표시할 항목 수
-    const skip = (page - 1) * pageSize; // 페이지 번호에 따라 스킵할 항목 수 계산
+    const pageSize = 10;
+    const skip = (page - 1) * pageSize;
 
     const allLikedStores = await this.storeLikeModel.aggregate([
       {
@@ -124,7 +142,7 @@ export class LikesRepository {
         $addFields: {
           distance: {
             $multiply: [
-              6371, // 지구의 반지름
+              6371,
               {
                 $sqrt: {
                   $add: [
@@ -208,8 +226,8 @@ export class LikesRepository {
     userLongitude: number,
     page: number,
   ): Promise<any> {
-    const pageSize = 10; // 한 페이지에 표시할 항목 수
-    const skip = (page - 1) * pageSize; // 페이지 번호에 따라 스킵할 항목 수 계산
+    const pageSize = 10;
+    const skip = (page - 1) * pageSize;
 
     const allLikedCakes = await this.cakeLikeModel.aggregate([
       {
@@ -249,7 +267,7 @@ export class LikesRepository {
         $addFields: {
           distance: {
             $multiply: [
-              6371, // 지구의 반지름
+              6371,
               {
                 $sqrt: {
                   $add: [
@@ -324,13 +342,11 @@ export class LikesRepository {
   }
 
   async createCakeLike(createCakeLikeDto: CreateCakeLikeDto) {
-    // 존재하는 케이크인지 체크
     const cake = await this.cakeModel.findById(createCakeLikeDto.cakeId);
     if (!cake) {
       throw new NotFoundException('Invalid cake id');
     }
 
-    // like 중복 체크
     const isExist = await this.cakeLikeModel.findOne({
       userId: createCakeLikeDto.userId,
       cakeId: createCakeLikeDto.cakeId,
@@ -347,13 +363,10 @@ export class LikesRepository {
   }
 
   async createStoreLike(createStoreLikeDto: CreateStoreLikeDto) {
-    // 존재하는 store인지 체크
     const store = await this.storeModel.findById(createStoreLikeDto.storeId);
     if (!store) {
       throw new NotFoundException('Invalid store id');
     }
-
-    // like 중복 체크
     const isExist = await this.storeLikeModel.findOne({
       userId: createStoreLikeDto.userId,
       storeId: createStoreLikeDto.storeId,
@@ -370,7 +383,6 @@ export class LikesRepository {
   }
 
   async deleteCakeLike(uid: string, cakeId: string) {
-    // 케이크 존재 확인
     const cake = await this.cakeModel.findById(cakeId);
     if (!cake) {
       throw new NotFoundException('Cake not found');
@@ -387,7 +399,6 @@ export class LikesRepository {
   }
 
   async deleteStoreLike(uid: string, storeId: string) {
-    // store 존재 확인
     const store = await this.storeModel.findById(storeId);
     if (!store) {
       throw new NotFoundException('Store not found');

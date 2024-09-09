@@ -9,14 +9,12 @@ import { setSortCriteria } from 'src/utils/validation-utils';
 export class LikesService {
   constructor(private readonly likesRepository: LikesRepository) {}
 
-  // 찜한 가게의 새로 나온 케이크 리스트 가져오기
   async getNewCakesInLikedStores(uid: string) {
     const newCakesInLikedStores =
       await this.likesRepository.getNewCakesInLikedStores(uid);
     return newCakesInLikedStores;
   }
 
-  // 전체 찜 케이크 리스트 가져오기
   async getAllLikedCakes(
     uid: string,
     sortBy: string,
@@ -40,7 +38,6 @@ export class LikesService {
     return allLikedCakes;
   }
 
-  // 전체 찜 가게 리스트 가져오기
   async getAllStoreLikes(
     uid: string,
     sortBy: string,
@@ -64,7 +61,6 @@ export class LikesService {
     return allLikedStores;
   }
 
-  // 찜 케이크 추가
   async createCakeLike(uid: string, cakeId: string) {
     const createCakeLikeDto = new CreateCakeLikeDto(
       new ObjectId(uid),
@@ -76,7 +72,6 @@ export class LikesService {
     return newLike;
   }
 
-  // 찜 가게 추가
   async createStoreLike(uid: string, storeId: string) {
     const createStoreLikeDto = new CreateStoreLikeDto(
       new ObjectId(uid),
@@ -88,7 +83,6 @@ export class LikesService {
     return newLike;
   }
 
-  // 찜 케이크 삭제
   async deleteCakeLike(uid: string, cakeId: string) {
     const deletedCakeLike = await this.likesRepository.deleteCakeLike(
       uid,
@@ -97,7 +91,6 @@ export class LikesService {
     return deletedCakeLike;
   }
 
-  // 찜 가게 삭제
   async deleteStoreLike(uid: string, storeId: string) {
     const deletedStoreLike = await this.likesRepository.deleteStoreLike(
       uid,
