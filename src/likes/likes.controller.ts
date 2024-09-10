@@ -62,13 +62,7 @@ export class LikesController {
         longitude,
       );
     }
-    return this.likesService.getAllLikedCakes(
-      uid,
-      defaultSortBy,
-      page,
-      latitude,
-      longitude,
-    );
+    return this.likesService.getAllLikedCakes(uid, defaultSortBy, page);
   }
 
   @Post('cakes/:cakeId')
