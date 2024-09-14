@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import { Readable } from 'stream';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 @Injectable()
 export class S3Service {
@@ -10,6 +11,22 @@ export class S3Service {
     this.s3 = new S3Client({
       region: process.env.S3_REGION,
     });
+  }
+
+  async generagePresignedDownloadUrl(key: string): Promise<string> {
+    const command = new GetObjectCommand({
+      Bucket: process.env.S3_RESIZED_BUCKET_NAME,
+      Key: key,
+    });
+
+    try {
+      const url = await getSignedUrl(this.s3, command, { expiresIn: 3600 });
+      return url;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Failed to generate presigned download URL: ${error.message}`,
+      );
+    }
   }
 
   async getFile(key: string): Promise<Buffer> {

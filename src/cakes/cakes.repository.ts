@@ -23,6 +23,12 @@ export class CakesRepository {
         },
       },
       {
+        $unwind: {
+          path: '$likes',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
         $lookup: {
           from: 'stores',
           localField: 'storeId',
@@ -41,6 +47,12 @@ export class CakesRepository {
           localField: 'store._id',
           foreignField: 'storeId',
           as: 'result',
+        },
+      },
+      {
+        $unwind: {
+          path: '$result',
+          preserveNullAndEmptyArrays: true,
         },
       },
       {
@@ -116,6 +128,12 @@ export class CakesRepository {
           localField: '_id',
           foreignField: 'cakeId',
           as: 'result',
+        },
+      },
+      {
+        $unwind: {
+          path: '$result',
+          preserveNullAndEmptyArrays: true,
         },
       },
       {
@@ -207,6 +225,12 @@ export class CakesRepository {
           localField: '_id',
           foreignField: 'cakeId',
           as: 'result',
+        },
+      },
+      {
+        $unwind: {
+          path: '$result',
+          preserveNullAndEmptyArrays: true,
         },
       },
       {
@@ -312,6 +336,12 @@ export class CakesRepository {
         },
       },
       {
+        $unwind: {
+          path: '$result',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
         $lookup: {
           from: 'stores',
           localField: 'storeId',
@@ -330,6 +360,12 @@ export class CakesRepository {
           localField: 'store._id',
           foreignField: 'storeId',
           as: 'storeLikes',
+        },
+      },
+      {
+        $unwind: {
+          path: '$storeLikes',
+          preserveNullAndEmptyArrays: true,
         },
       },
       {
@@ -413,11 +449,17 @@ export class CakesRepository {
         },
       },
       {
+        $unwind: {
+          path: '$likes',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
         $addFields: {
           isLiked: {
             $cond: {
               if: {
-                $eq: [new ObjectId(uid), '$cakeLikes.userId'],
+                $eq: [new ObjectId(uid), '$likes.userId'],
               },
               then: true,
               else: false,
@@ -451,6 +493,12 @@ export class CakesRepository {
           localField: '_id',
           foreignField: 'cakeId',
           as: 'result',
+        },
+      },
+      {
+        $unwind: {
+          path: '$result',
+          preserveNullAndEmptyArrays: true,
         },
       },
       {
@@ -509,18 +557,6 @@ export class CakesRepository {
     return categoriesWithPhotos;
   }
 
-  // 케이크 데이터를 업데이트하는 함수
-  async updateCake(cakeId: string, updateData: any): Promise<any> {
-    return this.cakeModel
-      .findByIdAndUpdate(cakeId, updateData, { new: true })
-      .exec();
-  }
-
-  // 케이크 데이터를 삭제하는 함수
-  async deleteCake(cakeId: string): Promise<any> {
-    return this.cakeModel.findByIdAndDelete(cakeId).exec();
-  }
-
   async createCake(createCakeDto: any) {
     const storeInstarId = createCakeDto['storeInstarId'];
     const store = await this.storeModel.findOne({ instarId: storeInstarId });
@@ -576,6 +612,12 @@ export class CakesRepository {
         },
       },
       {
+        $unwind: {
+          path: '$likes',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
         $lookup: {
           from: 'stores',
           localField: 'storeId',
@@ -594,6 +636,12 @@ export class CakesRepository {
           localField: 'store._id',
           foreignField: 'storeId',
           as: 'result',
+        },
+      },
+      {
+        $unwind: {
+          path: '$result',
+          preserveNullAndEmptyArrays: true,
         },
       },
       {
@@ -629,6 +677,6 @@ export class CakesRepository {
       },
     ]);
 
-    return worldCupWinner;
+    return worldCupWinner[0];
   }
 }

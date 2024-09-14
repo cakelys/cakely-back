@@ -30,11 +30,26 @@ export class CakesService {
       userLongitudeNumber,
       pageInt,
     );
+
+    for (const recommendedCake of recommendedCakes) {
+      recommendedCake.photo = await this.s3Service.generagePresignedDownloadUrl(
+        recommendedCake.photo,
+      );
+    }
     return recommendedCakes;
   }
 
   async getTodayCakes(uid: string) {
     const todayCakes = await this.cakesRepository.getTodayCakesData(uid);
+
+    for (const todayData of todayCakes) {
+      todayData.store.logo = await this.s3Service.generagePresignedDownloadUrl(
+        todayData.store.logo,
+      );
+      todayData.cake.photo = await this.s3Service.generagePresignedDownloadUrl(
+        todayData.cake.photo,
+      );
+    }
 
     return todayCakes;
   }
@@ -60,6 +75,12 @@ export class CakesService {
       userLongitudeNumber,
       pageInt,
     );
+
+    for (const categoryData of categoryCakes.categoryCakes) {
+      categoryData.photo = await this.s3Service.generagePresignedDownloadUrl(
+        categoryData.photo,
+      );
+    }
     return categoryCakes;
   }
 
@@ -71,24 +92,44 @@ export class CakesService {
   ) {
     const userLatitudeNumber = parseFloat(userLatitude);
     const userLongitudeNumber = parseFloat(userLongitude);
-    const cake = await this.cakesRepository.getCakeByIdData(
+    const cakeData = await this.cakesRepository.getCakeByIdData(
       uid,
       cakeId,
       userLatitudeNumber,
       userLongitudeNumber,
     );
 
+    cakeData.store.logo = await this.s3Service.generagePresignedDownloadUrl(
+      cakeData.store.logo,
+    );
+
+    cakeData.cake.photo = await this.s3Service.generagePresignedDownloadUrl(
+      cakeData.cake.photo,
+    );
+
+    for (const recommendedCake of cakeData.recommendedCakes) {
+      recommendedCake.photo = await this.s3Service.generagePresignedDownloadUrl(
+        recommendedCake.photo,
+      );
+    }
+
     const key = 'app-data/store-notes.json';
     const storeNotesFileData = await this.s3Service.getFile(key);
     const storeNotesFileContent = storeNotesFileData.toString('utf-8');
     const storeNotesJsonData = JSON.parse(storeNotesFileContent);
 
-    cake.notes = storeNotesJsonData.notes;
-    return cake;
+    cakeData.notes = storeNotesJsonData.notes;
+    return cakeData;
   }
 
   async getCakesByIds(uid: string, cakeIds: string[]) {
     const cakes = await this.cakesRepository.getCakesByIdData(uid, cakeIds);
+
+    for (const cake of cakes) {
+      cake.photo = await this.s3Service.generagePresignedDownloadUrl(
+        cake.photo,
+      );
+    }
     return cakes;
   }
 
@@ -101,6 +142,12 @@ export class CakesService {
     const categories = await this.cakesRepository.getCategories(
       categoryListJsonData,
     );
+
+    for (const category of categories) {
+      category.photo = await this.s3Service.generagePresignedDownloadUrl(
+        category.photo,
+      );
+    }
     return categories;
   }
 
@@ -117,6 +164,12 @@ export class CakesService {
 
   async getWorldCupCakes() {
     const worldCupCakes = await this.cakesRepository.getWorldCupCakesData();
+
+    for (const worldCupCake of worldCupCakes) {
+      worldCupCake.photo = await this.s3Service.generagePresignedDownloadUrl(
+        worldCupCake.photo,
+      );
+    }
     return worldCupCakes;
   }
 
@@ -125,6 +178,16 @@ export class CakesService {
       uid,
       cakeId,
     );
+
+    worldCupWinner.cake.photo =
+      await this.s3Service.generagePresignedDownloadUrl(
+        worldCupWinner.cake.photo,
+      );
+
+    worldCupWinner.store.logo =
+      await this.s3Service.generagePresignedDownloadUrl(
+        worldCupWinner.store.logo,
+      );
     return worldCupWinner;
   }
 }
