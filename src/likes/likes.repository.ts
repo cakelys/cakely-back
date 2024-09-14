@@ -331,7 +331,7 @@ export class LikesRepository {
       },
       {
         $addFields: {
-          isFavorite: true,
+          isLiked: true,
         },
       },
       { $skip: skip },

@@ -4,14 +4,40 @@ import { CreateStoreLikeDto } from './dto/create-store-like.dto';
 import { ObjectId } from 'mongodb';
 import { LikesRepository } from './likes.repository';
 import { setSortCriteria } from 'src/utils/validation-utils';
+import { S3Service } from 'src/s3/s3.service';
 
 @Injectable()
 export class LikesService {
-  constructor(private readonly likesRepository: LikesRepository) {}
+  constructor(
+    private readonly likesRepository: LikesRepository,
+    private readonly s3Service: S3Service,
+  ) {}
 
   async getNewCakesInLikedStores(uid: string) {
     const newCakesInLikedStores =
       await this.likesRepository.getNewCakesInLikedStores(uid);
+
+    for (const newCakesInLikedStore of newCakesInLikedStores) {
+      if (newCakesInLikedStore.cake.photo === null) {
+        newCakesInLikedStores.splice(
+          newCakesInLikedStores.indexOf(newCakesInLikedStore),
+          1,
+        );
+      }
+    }
+
+    for (const newCakesInLikedStore of newCakesInLikedStores) {
+      newCakesInLikedStore.store.logo =
+        await this.s3Service.generagePresignedDownloadUrl(
+          newCakesInLikedStore.store.logo,
+        );
+
+      newCakesInLikedStore.cake.photo =
+        await this.s3Service.generagePresignedDownloadUrl(
+          newCakesInLikedStore.cake.photo,
+        );
+    }
+
     return newCakesInLikedStores;
   }
 
@@ -35,6 +61,12 @@ export class LikesService {
       pageInt,
     );
 
+    for (const LikedCake of allLikedCakes) {
+      LikedCake.photo = await this.s3Service.generagePresignedDownloadUrl(
+        LikedCake.photo,
+      );
+    }
+
     return allLikedCakes;
   }
 
@@ -57,6 +89,12 @@ export class LikesService {
       userLongitudeNumber,
       pageInt,
     );
+
+    for (const LikedStore of allLikedStores) {
+      LikedStore.logo = await this.s3Service.generagePresignedDownloadUrl(
+        LikedStore.logo,
+      );
+    }
 
     return allLikedStores;
   }
