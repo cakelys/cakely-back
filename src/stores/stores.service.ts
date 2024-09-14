@@ -30,16 +30,47 @@ export class StoresService {
       userLongitudeNumber,
       pageInt,
     );
+
+    for (const storeData of allStores) {
+      storeData.store.logo = await this.s3Service.generagePresignedDownloadUrl(
+        storeData.store.logo,
+      );
+
+      storeData.popularCakes = await Promise.all(
+        storeData.popularCakes.map(async (popularCake) => {
+          popularCake.photo = await this.s3Service.generagePresignedDownloadUrl(
+            popularCake.photo,
+          );
+          return popularCake;
+        }),
+      );
+    }
+
     return allStores;
   }
 
   async getStoreById(uid: string, storeId: string) {
-    const store = await this.storesRepository.getStoreById(uid, storeId);
+    const storeData = await this.storesRepository.getStoreById(uid, storeId);
 
-    const randomIndex = Math.floor(Math.random() * store.popularCakes.length);
-    store.store.backgroundImage = store.popularCakes[randomIndex].photo;
+    storeData.store.logo = await this.s3Service.generagePresignedDownloadUrl(
+      storeData.store.logo,
+    );
 
-    return store;
+    storeData.popularCakes = await Promise.all(
+      storeData.popularCakes.map(async (popularCake) => {
+        popularCake.photo = await this.s3Service.generagePresignedDownloadUrl(
+          popularCake.photo,
+        );
+        return popularCake;
+      }),
+    );
+
+    const randomIndex = Math.floor(
+      Math.random() * storeData.popularCakes.length,
+    );
+    storeData.store.backgroundImage = storeData.popularCakes[randomIndex].photo;
+
+    return storeData;
   }
 
   async getStoreCakes(uid: string, storeId: string, page: string) {
@@ -50,6 +81,11 @@ export class StoresService {
       pageInt,
     );
 
+    for (const storeCake of storeCakes) {
+      storeCake.photo = await this.s3Service.generagePresignedDownloadUrl(
+        storeCake.photo,
+      );
+    }
     return storeCakes;
   }
 
@@ -68,6 +104,22 @@ export class StoresService {
       cakeId,
       userLatitudeNumber,
       userLongitudeNumber,
+    );
+
+    storeCake.store.logo = await this.s3Service.generagePresignedDownloadUrl(
+      storeCake.store.logo,
+    );
+    storeCake.cake.photo = await this.s3Service.generagePresignedDownloadUrl(
+      storeCake.cake.photo,
+    );
+    storeCake.recommendedCakes = await Promise.all(
+      storeCake.recommendedCakes.map(async (recommendedCake) => {
+        recommendedCake.photo =
+          await this.s3Service.generagePresignedDownloadUrl(
+            recommendedCake.photo,
+          );
+        return recommendedCake;
+      }),
     );
 
     const key = 'app-data/store-notes.json';
@@ -106,6 +158,22 @@ export class StoresService {
       userLatitude,
       userLongitude,
     );
+
+    for (const nearbyStore of nearbyStores) {
+      nearbyStore.store.logo =
+        await this.s3Service.generagePresignedDownloadUrl(
+          nearbyStore.store.logo,
+        );
+
+      nearbyStore.popularCakes = await Promise.all(
+        nearbyStore.popularCakes.map(async (popularCake) => {
+          popularCake.photo = await this.s3Service.generagePresignedDownloadUrl(
+            popularCake.photo,
+          );
+          return popularCake;
+        }),
+      );
+    }
     return nearbyStores;
   }
 

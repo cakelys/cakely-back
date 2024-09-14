@@ -136,6 +136,24 @@ export class StoresRepository {
         },
       },
       {
+        $addFields: {
+          popularCakes: {
+            $cond: {
+              if: {
+                $and: [
+                  { $eq: [{ $size: '$popularCakes' }, 1] },
+                  {
+                    $eq: [{ $arrayElemAt: ['$popularCakes.photo', 0] }, null],
+                  },
+                ],
+              },
+              then: [],
+              else: '$popularCakes',
+            },
+          },
+        },
+      },
+      {
         $project: {
           _id: 0,
           store: {
@@ -179,19 +197,19 @@ export class StoresRepository {
           from: 'storeLikes',
           localField: '_id',
           foreignField: 'storeId',
-          as: 'result',
+          as: 'storeLikes',
         },
       },
       {
         $addFields: {
           likesCount: {
-            $size: '$result',
+            $size: '$storeLikes',
           },
         },
       },
       {
         $unwind: {
-          path: '$result',
+          path: '$storeLikes',
           preserveNullAndEmptyArrays: true,
         },
       },
@@ -275,15 +293,7 @@ export class StoresRepository {
             name: '$_id.name',
             address: '$_id.address',
             logo: '$_id.logo',
-            isLiked: {
-              $cond: {
-                if: {
-                  $eq: ['$result.userId', new ObjectId(uid)],
-                },
-                then: true,
-                else: false,
-              },
-            },
+            isLiked: '$isLiked',
             likesCount: '$_id.likesCount',
           },
           popularCakes: 1,
@@ -331,6 +341,12 @@ export class StoresRepository {
           localField: 'cakes._id',
           foreignField: 'cakeId',
           as: 'result',
+        },
+      },
+      {
+        $unwind: {
+          path: '$result',
+          preserveNullAndEmptyArrays: true,
         },
       },
       {
@@ -398,6 +414,12 @@ export class StoresRepository {
         },
       },
       {
+        $unwind: {
+          path: '$result',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
         $lookup: {
           from: 'stores',
           localField: 'storeId',
@@ -421,6 +443,12 @@ export class StoresRepository {
           localField: 'store._id',
           foreignField: 'storeId',
           as: 'storeLikes',
+        },
+      },
+      {
+        $unwind: {
+          path: '$storeLikes',
+          preserveNullAndEmptyArrays: true,
         },
       },
       {
@@ -517,6 +545,12 @@ export class StoresRepository {
           localField: 'cakes._id',
           foreignField: 'cakeId',
           as: 'result',
+        },
+      },
+      {
+        $unwind: {
+          path: '$result',
+          preserveNullAndEmptyArrays: true,
         },
       },
       {
@@ -695,6 +729,39 @@ export class StoresRepository {
                   else: false,
                 },
               },
+            },
+          },
+        },
+      },
+      {
+        $addFields: {
+          popularCakes: {
+            $slice: [
+              {
+                $sortArray: {
+                  input: '$popularCakes',
+                  sortBy: { popularity: -1 },
+                },
+              },
+              10,
+            ],
+          },
+        },
+      },
+      {
+        $addFields: {
+          popularCakes: {
+            $cond: {
+              if: {
+                $and: [
+                  { $eq: [{ $size: '$popularCakes' }, 1] },
+                  {
+                    $eq: [{ $arrayElemAt: ['$popularCakes.photo', 0] }, null],
+                  },
+                ],
+              },
+              then: [],
+              else: '$popularCakes',
             },
           },
         },
