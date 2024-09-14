@@ -2,13 +2,13 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ObjectId } from 'mongodb';
 import { Document } from 'mongoose';
 
-@Schema({ timestamps: true, collection: 'stores' })
+@Schema({
+  timestamps: { createdAt: 'createdDate', updatedAt: '' },
+  collection: 'stores',
+})
 export class Store extends Document {
   @Prop({ type: ObjectId })
   id: string;
-
-  @Prop({ type: ObjectId })
-  storeId: ObjectId;
 
   @Prop({ type: String })
   name: string;
@@ -31,11 +31,8 @@ export class Store extends Document {
   @Prop({ type: String })
   info: string;
 
-  @Prop({ type: String })
-  description: string;
-
-  @Prop({ type: String })
-  siteUrl: string;
+  @Prop({ type: [{ type: String }] })
+  siteUrl: string[];
 
   @Prop({ type: [{ type: String }] })
   sizes: string[];
