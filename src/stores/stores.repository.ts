@@ -1,7 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ObjectId } from 'mongodb';
 import { Model } from 'mongoose';
+import { CreateStoreDto } from './dto/create-store.dto';
 
 @Injectable()
 export class StoresRepository {
@@ -477,7 +482,7 @@ export class StoresRepository {
           'store.logo': 1,
           'store.address': 1,
           'store.distance': '$distance',
-          'store.siteUrl': 1,
+          'store.siteUrl': { $arrayElemAt: ['$store.siteUrl', 0] },
         },
       },
     ]);
@@ -718,5 +723,18 @@ export class StoresRepository {
     ]);
 
     return nearbyStores;
+  }
+
+  async createStore(createStoreDto: CreateStoreDto) {
+    const existingStore = await this.storeModel.findOne({
+      instarId: createStoreDto.instarId,
+    });
+
+    if (existingStore) {
+      throw new ConflictException('이미 존재하는 스토어입니다.');
+    }
+
+    const newStore = new this.storeModel(createStoreDto);
+    return newStore.save();
   }
 }

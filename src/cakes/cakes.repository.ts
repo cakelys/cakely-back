@@ -391,7 +391,7 @@ export class CakesRepository {
           'store.logo': 1,
           'store.address': 1,
           'store.distance': '$distance',
-          'store.siteUrl': 1,
+          'store.siteUrl': { $arrayElemAt: ['$store.siteUrl', 0] },
         },
       },
     ]);

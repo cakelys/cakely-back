@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { StoresService } from './stores.service';
 import {
   setDefaultSort,
@@ -99,5 +99,10 @@ export class StoresController {
       );
     }
     return this.storesService.getStoreDetails(uid, storeId);
+  }
+
+  @Post()
+  createStore(@Body() body: any) {
+    return this.storesService.createStore(body);
   }
 }

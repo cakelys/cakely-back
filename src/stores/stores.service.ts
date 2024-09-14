@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { setSortCriteria } from 'src/utils/validation-utils';
 import { StoresRepository } from './stores.repository';
 import { S3Service } from 'src/s3/s3.service';
+import { CreateStoreDto } from './dto/create-store.dto';
 
 @Injectable()
 export class StoresService {
@@ -106,5 +107,10 @@ export class StoresService {
       userLongitude,
     );
     return nearbyStores;
+  }
+
+  async createStore(createStoreDto: CreateStoreDto) {
+    createStoreDto['logo'] = `${createStoreDto.instarId}/logo.png`;
+    return this.storesRepository.createStore(createStoreDto);
   }
 }
