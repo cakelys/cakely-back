@@ -566,6 +566,7 @@ export class CakesRepository {
       throw new NotFoundException('가게를 찾을 수 없습니다.');
     }
 
+    createCakeDto['storeId'] = store._id;
     const photoParts = createCakeDto.photo.split('_');
     const lastPart = photoParts[photoParts.length - 1];
     const createdTimeStamp = Number(lastPart.replace('.png', ''));
