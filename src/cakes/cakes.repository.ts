@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { Store } from 'src/stores/entities/store.entity';
 import { Cake } from './entities/cake.entity';
+import { CreateCakeDto } from './dto/create-cake.dto';
 
 @Injectable()
 export class CakesRepository {
@@ -557,7 +558,7 @@ export class CakesRepository {
     return categoriesWithPhotos;
   }
 
-  async createCake(createCakeDto: any) {
+  async createCake(createCakeDto: CreateCakeDto) {
     const storeInstarId = createCakeDto['storeInstarId'];
     const store = await this.storeModel.findOne({ instarId: storeInstarId });
 
@@ -565,7 +566,15 @@ export class CakesRepository {
       throw new NotFoundException('가게를 찾을 수 없습니다.');
     }
 
-    createCakeDto['storeId'] = store._id;
+    const photoParts = createCakeDto.photo.split('_');
+    const lastPart = photoParts[photoParts.length - 1];
+    const createdTimeStamp = Number(lastPart.replace('.png', ''));
+
+    if (isNaN(createdTimeStamp)) {
+      throw new NotFoundException('잘못된 파일명입니다.');
+    }
+
+    createCakeDto['createdDate'] = new Date(createdTimeStamp);
 
     const newCake = await this.cakeModel.create(createCakeDto);
     return newCake;
