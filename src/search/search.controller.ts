@@ -7,6 +7,7 @@ export class SearchController {
 
   @Get()
   searchCakes(@Query('keyword') keyword: string, @Query('page') page: string) {
-    return this.searchService.searchCakes(keyword, page);
+    const uid = '665f134a0dfff9c6393100d5';
+    return this.searchService.searchCakes(uid, keyword, page);
   }
 }
