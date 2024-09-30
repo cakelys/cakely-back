@@ -10,4 +10,9 @@ export class SearchController {
     const uid = '665f134a0dfff9c6393100d5';
     return this.searchService.searchCakes(uid, keyword, page);
   }
+
+  @Get('recommend-keyword')
+  recommendSearchKeyword() {
+    return this.searchService.recommendSearchKeyword();
+  }
 }

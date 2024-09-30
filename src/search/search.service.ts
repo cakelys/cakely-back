@@ -49,4 +49,13 @@ export class SearchService {
     });
     await searchLog.save();
   }
+
+  async recommendSearchKeyword() {
+    const key = 'app-data/recommend-keyword.json';
+    const recommendKeywords = await this.s3Service.getFile(key);
+    const recommendKeywordsContent = recommendKeywords.toString('utf-8');
+    const recommendKeywordsJson = JSON.parse(recommendKeywordsContent);
+
+    return recommendKeywordsJson;
+  }
 }
