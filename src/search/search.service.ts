@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 import { lastValueFrom } from 'rxjs';
 import { S3Service } from 'src/s3/s3.service';
 import { SearchLog } from './entities/searchLog.entity';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class SearchService {
@@ -42,7 +43,10 @@ export class SearchService {
   }
 
   async createSearchLog(keyword: string, userId: string) {
-    const searchLog = new this.searchLogModel({ keyword, userId });
+    const searchLog = new this.searchLogModel({
+      keyword,
+      userId: new ObjectId(userId),
+    });
     await searchLog.save();
   }
 }
