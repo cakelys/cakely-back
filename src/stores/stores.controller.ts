@@ -31,6 +31,14 @@ export class StoresController {
         latitude,
         longitude,
       );
+    } else if (latitude && longitude) {
+      return this.storesService.getAllStores(
+        uid,
+        defaultSortBy,
+        page,
+        latitude,
+        longitude,
+      );
     }
 
     return this.storesService.getAllStores(uid, defaultSortBy, page);
