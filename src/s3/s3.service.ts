@@ -13,9 +13,12 @@ export class S3Service {
     });
   }
 
-  async generagePresignedDownloadUrl(key: string): Promise<string> {
+  async generagePresignedDownloadUrl(
+    bucketName: string,
+    key: string,
+  ): Promise<string> {
     const command = new GetObjectCommand({
-      Bucket: process.env.S3_RESIZED_BUCKET_NAME,
+      Bucket: bucketName,
       Key: key,
     });
 

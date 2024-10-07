@@ -32,6 +32,7 @@ export class SearchService {
 
       for (const cake of searchResponseData.result) {
         cake.photo = await this.s3Service.generagePresignedDownloadUrl(
+          process.env.S3_RESIZED_BUCKET_NAME,
           cake.photo,
         );
       }

@@ -33,12 +33,14 @@ export class StoresService {
 
     for (const storeData of allStores) {
       storeData.store.logo = await this.s3Service.generagePresignedDownloadUrl(
+        process.env.S3_RESIZED_BUCKET_NAME,
         storeData.store.logo,
       );
 
       storeData.popularCakes = await Promise.all(
         storeData.popularCakes.map(async (popularCake) => {
           popularCake.photo = await this.s3Service.generagePresignedDownloadUrl(
+            process.env.S3_RESIZED_BUCKET_NAME,
             popularCake.photo,
           );
           return popularCake;
@@ -53,22 +55,35 @@ export class StoresService {
     const storeData = await this.storesRepository.getStoreById(uid, storeId);
 
     storeData.store.logo = await this.s3Service.generagePresignedDownloadUrl(
+      process.env.S3_RESIZED_BUCKET_NAME,
       storeData.store.logo,
     );
 
-    storeData.popularCakes = await Promise.all(
-      storeData.popularCakes.map(async (popularCake) => {
-        popularCake.photo = await this.s3Service.generagePresignedDownloadUrl(
-          popularCake.photo,
-        );
-        return popularCake;
-      }),
-    );
+    const isEmptyPopuplarCakes = storeData.popularCakes[0].photo === null;
 
-    const randomIndex = Math.floor(
-      Math.random() * storeData.popularCakes.length,
-    );
-    storeData.store.backgroundImage = storeData.popularCakes[randomIndex].photo;
+    if (isEmptyPopuplarCakes) {
+      storeData.popularCakes = [];
+      storeData.store.backgroundImage =
+        await this.s3Service.generagePresignedDownloadUrl(
+          process.env.S3_BUCKET_NAME,
+          'app-data/default-store-background.png',
+        );
+    } else {
+      storeData.popularCakes = await Promise.all(
+        storeData.popularCakes.map(async (popularCake) => {
+          popularCake.photo = await this.s3Service.generagePresignedDownloadUrl(
+            process.env.S3_RESIZED_BUCKET_NAME,
+            popularCake.photo,
+          );
+          return popularCake;
+        }),
+      );
+      const randomIndex = Math.floor(
+        Math.random() * storeData.popularCakes.length,
+      );
+      storeData.store.backgroundImage =
+        storeData.popularCakes[randomIndex].photo;
+    }
 
     return storeData;
   }
@@ -83,6 +98,7 @@ export class StoresService {
 
     for (const storeCake of storeCakes) {
       storeCake.photo = await this.s3Service.generagePresignedDownloadUrl(
+        process.env.S3_RESIZED_BUCKET_NAME,
         storeCake.photo,
       );
     }
@@ -107,15 +123,18 @@ export class StoresService {
     );
 
     storeCake.store.logo = await this.s3Service.generagePresignedDownloadUrl(
+      process.env.S3_RESIZED_BUCKET_NAME,
       storeCake.store.logo,
     );
     storeCake.cake.photo = await this.s3Service.generagePresignedDownloadUrl(
+      process.env.S3_RESIZED_BUCKET_NAME,
       storeCake.cake.photo,
     );
     storeCake.recommendedCakes = await Promise.all(
       storeCake.recommendedCakes.map(async (recommendedCake) => {
         recommendedCake.photo =
           await this.s3Service.generagePresignedDownloadUrl(
+            process.env.S3_RESIZED_BUCKET_NAME,
             recommendedCake.photo,
           );
         return recommendedCake;
@@ -162,12 +181,14 @@ export class StoresService {
     for (const nearbyStore of nearbyStores) {
       nearbyStore.store.logo =
         await this.s3Service.generagePresignedDownloadUrl(
+          process.env.S3_RESIZED_BUCKET_NAME,
           nearbyStore.store.logo,
         );
 
       nearbyStore.popularCakes = await Promise.all(
         nearbyStore.popularCakes.map(async (popularCake) => {
           popularCake.photo = await this.s3Service.generagePresignedDownloadUrl(
+            process.env.S3_RESIZED_BUCKET_NAME,
             popularCake.photo,
           );
           return popularCake;

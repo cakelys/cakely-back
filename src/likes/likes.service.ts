@@ -29,11 +29,13 @@ export class LikesService {
     for (const newCakesInLikedStore of newCakesInLikedStores) {
       newCakesInLikedStore.store.logo =
         await this.s3Service.generagePresignedDownloadUrl(
+          process.env.S3_RESIZED_BUCKET_NAME,
           newCakesInLikedStore.store.logo,
         );
 
       newCakesInLikedStore.cake.photo =
         await this.s3Service.generagePresignedDownloadUrl(
+          process.env.S3_RESIZED_BUCKET_NAME,
           newCakesInLikedStore.cake.photo,
         );
     }
@@ -63,6 +65,7 @@ export class LikesService {
 
     for (const LikedCake of allLikedCakes) {
       LikedCake.photo = await this.s3Service.generagePresignedDownloadUrl(
+        process.env.S3_RESIZED_BUCKET_NAME,
         LikedCake.photo,
       );
     }
@@ -92,6 +95,7 @@ export class LikesService {
 
     for (const LikedStore of allLikedStores) {
       LikedStore.logo = await this.s3Service.generagePresignedDownloadUrl(
+        process.env.S3_RESIZED_BUCKET_NAME,
         LikedStore.logo,
       );
     }

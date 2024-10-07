@@ -33,6 +33,7 @@ export class CakesService {
 
     for (const recommendedCake of recommendedCakes) {
       recommendedCake.photo = await this.s3Service.generagePresignedDownloadUrl(
+        process.env.S3_RESIZED_BUCKET_NAME,
         recommendedCake.photo,
       );
     }
@@ -44,9 +45,11 @@ export class CakesService {
 
     for (const todayData of todayCakes) {
       todayData.store.logo = await this.s3Service.generagePresignedDownloadUrl(
+        process.env.S3_RESIZED_BUCKET_NAME,
         todayData.store.logo,
       );
       todayData.cake.photo = await this.s3Service.generagePresignedDownloadUrl(
+        process.env.S3_RESIZED_BUCKET_NAME,
         todayData.cake.photo,
       );
     }
@@ -78,6 +81,7 @@ export class CakesService {
 
     for (const categoryData of categoryCakes.categoryCakes) {
       categoryData.photo = await this.s3Service.generagePresignedDownloadUrl(
+        process.env.S3_RESIZED_BUCKET_NAME,
         categoryData.photo,
       );
     }
@@ -100,15 +104,18 @@ export class CakesService {
     );
 
     cakeData.store.logo = await this.s3Service.generagePresignedDownloadUrl(
+      process.env.S3_RESIZED_BUCKET_NAME,
       cakeData.store.logo,
     );
 
     cakeData.cake.photo = await this.s3Service.generagePresignedDownloadUrl(
+      process.env.S3_RESIZED_BUCKET_NAME,
       cakeData.cake.photo,
     );
 
     for (const recommendedCake of cakeData.recommendedCakes) {
       recommendedCake.photo = await this.s3Service.generagePresignedDownloadUrl(
+        process.env.S3_RESIZED_BUCKET_NAME,
         recommendedCake.photo,
       );
     }
@@ -127,6 +134,7 @@ export class CakesService {
 
     for (const cake of cakes) {
       cake.photo = await this.s3Service.generagePresignedDownloadUrl(
+        process.env.S3_RESIZED_BUCKET_NAME,
         cake.photo,
       );
     }
@@ -145,6 +153,7 @@ export class CakesService {
 
     for (const category of categories) {
       category.photo = await this.s3Service.generagePresignedDownloadUrl(
+        process.env.S3_RESIZED_BUCKET_NAME,
         category.photo,
       );
     }
@@ -167,6 +176,7 @@ export class CakesService {
 
     for (const worldCupCake of worldCupCakes) {
       worldCupCake.photo = await this.s3Service.generagePresignedDownloadUrl(
+        process.env.S3_RESIZED_BUCKET_NAME,
         worldCupCake.photo,
       );
     }
@@ -181,11 +191,13 @@ export class CakesService {
 
     worldCupWinner.cake.photo =
       await this.s3Service.generagePresignedDownloadUrl(
+        process.env.S3_RESIZED_BUCKET_NAME,
         worldCupWinner.cake.photo,
       );
 
     worldCupWinner.store.logo =
       await this.s3Service.generagePresignedDownloadUrl(
+        process.env.S3_RESIZED_BUCKET_NAME,
         worldCupWinner.store.logo,
       );
     return worldCupWinner;
