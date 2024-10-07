@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { UsersRepository } from './users.repository';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -15,5 +16,9 @@ export class UsersService {
 
   async signIn(accessToken: string) {
     return this.usersRepository.signIn(accessToken);
+  }
+
+  async updateUserInfo(uid: string, updateUserDto: UpdateUserDto) {
+    this.usersRepository.updateUserInfo(uid, updateUserDto);
   }
 }

@@ -10,6 +10,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { FirebaseService } from 'src/auth/firebase.service';
 import { User } from './entities/user.entity';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersRepository {
@@ -94,5 +95,16 @@ export class UsersRepository {
 
     const newUser = new this.userModel(createUserDto);
     await newUser.save();
+  }
+
+  async updateUserInfo(uid: string, updateUserDto: UpdateUserDto) {
+    const userInfo = await this.userModel.findOneAndUpdate(
+      { uid: uid },
+      updateUserDto,
+      { new: true },
+    );
+    if (!userInfo) {
+      throw new NotFoundException('User not found');
+    }
   }
 }

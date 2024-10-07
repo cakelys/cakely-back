@@ -1,5 +1,9 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  GetObjectCommand,
+  PutObjectCommand,
+} from '@aws-sdk/client-s3';
 import { Readable } from 'stream';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
@@ -46,6 +50,25 @@ export class S3Service {
     } catch (error) {
       throw new Error(`Failed to get file from S3: ${error.message}`);
     }
+  }
+
+  async uploadFile(bucketName: string, uid: string, file) {
+    const command = new PutObjectCommand({
+      Bucket: bucketName,
+      Key: `profile-photo/${uid}/${file.originalname}`,
+      Body: file.buffer,
+      ContentType: file.mimetype,
+    });
+
+    const response = await this.s3.send(command);
+    const statusCode = response['$metadata'].httpStatusCode;
+    if (statusCode !== 200) {
+      throw new InternalServerErrorException(
+        `Failed to upload file to S3: ${response.$metadata.httpStatusCode}`,
+      );
+    }
+    const url = `https://${bucketName}.s3.amazonaws.com/profile-photo/${uid}/${file.originalname}`;
+    return url;
   }
 }
 

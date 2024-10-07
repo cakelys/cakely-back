@@ -1,3 +1,5 @@
+import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
+
 export class CreateUserDto {
   constructor(
     uid: string,
@@ -18,12 +20,36 @@ export class CreateUserDto {
     this.adNotification = adNotification;
     this.status = status;
   }
+
+  @IsString()
+  @IsNotEmpty()
   uid: string;
+
+  @IsString()
+  @IsNotEmpty()
   nickname: string;
+
+  @IsString()
+  @IsNotEmpty()
   account: string;
+
+  @IsString()
+  @IsNotEmpty()
   platform: string;
+
+  @IsString()
+  @IsNotEmpty()
   photo: string;
+
+  @IsNotEmpty()
+  @IsBoolean()
   pushNotification: boolean;
+
+  @IsNotEmpty()
+  @IsBoolean()
   adNotification: boolean;
+
+  @IsString()
+  @IsNotEmpty()
   status: string;
 }
