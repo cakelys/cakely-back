@@ -35,27 +35,12 @@ export class StoresRepository {
         },
       },
       {
-        $unwind: {
-          path: '$storeLikes',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
         $addFields: {
-          distance: {
-            $multiply: [
-              6371,
+          isLiked: {
+            $in: [
+              new ObjectId(uid),
               {
-                $sqrt: {
-                  $add: [
-                    {
-                      $pow: [{ $subtract: ['$latitude', userLatitude] }, 2],
-                    },
-                    {
-                      $pow: [{ $subtract: ['$longitude', userLongitude] }, 2],
-                    },
-                  ],
-                },
+                $map: { input: '$storeLikes', as: 'like', in: '$$like.userId' },
               },
             ],
           },
@@ -70,9 +55,20 @@ export class StoresRepository {
         },
       },
       {
-        $unwind: {
-          path: '$cakes',
-          preserveNullAndEmptyArrays: true,
+        $addFields: {
+          distance: {
+            $multiply: [
+              6371,
+              {
+                $sqrt: {
+                  $add: [
+                    { $pow: [{ $subtract: ['$latitude', userLatitude] }, 2] },
+                    { $pow: [{ $subtract: ['$longitude', userLongitude] }, 2] },
+                  ],
+                },
+              },
+            ],
+          },
         },
       },
       {
@@ -84,36 +80,25 @@ export class StoresRepository {
         },
       },
       {
-        $group: {
-          _id: {
-            storeId: '$_id',
-            name: '$name',
-            address: '$address',
-            logo: '$logo',
-            distance: '$distance',
-            popularity: '$popularity',
-            createdDate: '$createdDate',
-          },
-          isLiked: {
-            $first: {
-              $cond: {
-                if: { $eq: ['$storeLikes.userId', new ObjectId(uid)] },
-                then: true,
-                else: false,
-              },
-            },
-          },
+        $addFields: {
           popularCakes: {
-            $push: {
-              id: '$cakes._id',
-              photo: { $arrayElemAt: ['$cakes.photos', 0] },
-              isLiked: {
-                $cond: {
-                  if: {
-                    $in: [new ObjectId(uid), '$cakeLikes.userId'],
-                  },
-                  then: true,
-                  else: false,
+            $map: {
+              input: '$cakes',
+              as: 'cake',
+              in: {
+                id: '$$cake._id',
+                photo: { $arrayElemAt: ['$$cake.photos', 0] },
+                isLiked: {
+                  $in: [
+                    new ObjectId(uid),
+                    {
+                      $map: {
+                        input: '$cakeLikes',
+                        as: 'like',
+                        in: '$$like.userId',
+                      },
+                    },
+                  ],
                 },
               },
             },
@@ -121,7 +106,15 @@ export class StoresRepository {
         },
       },
       {
-        $addFields: {
+        $project: {
+          store: {
+            id: '$_id',
+            name: '$name',
+            address: '$address',
+            logo: '$logo',
+            distance: '$distance',
+            isLiked: '$isLiked',
+          },
           popularCakes: {
             $slice: [
               {
@@ -136,48 +129,8 @@ export class StoresRepository {
         },
       },
       {
-        $addFields: {
-          popularCakes: {
-            $cond: {
-              if: {
-                $and: [
-                  { $eq: [{ $size: '$popularCakes' }, 1] },
-                  {
-                    $eq: [{ $arrayElemAt: ['$popularCakes.photo', 0] }, null],
-                  },
-                ],
-              },
-              then: [],
-              else: '$popularCakes',
-            },
-          },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          store: {
-            id: '$_id.storeId',
-            name: '$_id.name',
-            address: '$_id.address',
-            logo: '$_id.logo',
-            distance: '$_id.distance',
-            isLiked: '$isLiked',
-            popularity: '$_id.popularity',
-            createdDate: '$_id.createdDate',
-          },
-          popularCakes: 1,
-        },
-      },
-      {
         $sort: {
           [`store.${sortCriteria}`]: sortCriteria === 'distance' ? 1 : -1,
-        },
-      },
-      {
-        $project: {
-          'store.popularity': 0,
-          'store.createdDate': 0,
         },
       },
       { $skip: skip },
