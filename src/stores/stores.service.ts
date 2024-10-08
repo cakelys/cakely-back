@@ -37,15 +37,20 @@ export class StoresService {
         storeData.store.logo,
       );
 
-      storeData.popularCakes = await Promise.all(
-        storeData.popularCakes.map(async (popularCake) => {
-          popularCake.photo = await this.s3Service.generagePresignedDownloadUrl(
-            process.env.S3_RESIZED_BUCKET_NAME,
-            popularCake.photo,
-          );
-          return popularCake;
-        }),
-      );
+      if (storeData.popularCakes[0].photo !== null) {
+        storeData.popularCakes = await Promise.all(
+          storeData.popularCakes.map(async (popularCake) => {
+            popularCake.photo =
+              await this.s3Service.generagePresignedDownloadUrl(
+                process.env.S3_RESIZED_BUCKET_NAME,
+                popularCake.photo,
+              );
+            return popularCake;
+          }),
+        );
+      } else {
+        storeData.popularCakes = [];
+      }
     }
 
     return allStores;
