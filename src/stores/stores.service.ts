@@ -97,10 +97,14 @@ export class StoresService {
     );
 
     for (const storeCake of storeCakes) {
-      storeCake.photo = await this.s3Service.generagePresignedDownloadUrl(
-        process.env.S3_RESIZED_BUCKET_NAME,
-        storeCake.photo,
-      );
+      if (storeCake.photo == null) {
+        storeCakes.splice(storeCakes.indexOf(storeCake), 1);
+      } else {
+        storeCake.photo = await this.s3Service.generagePresignedDownloadUrl(
+          process.env.S3_RESIZED_BUCKET_NAME,
+          storeCake.photo,
+        );
+      }
     }
     return storeCakes;
   }
