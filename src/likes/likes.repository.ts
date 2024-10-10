@@ -4,6 +4,7 @@ import { ObjectId } from 'mongodb';
 import { Model } from 'mongoose';
 import { CreateCakeLikeDto } from './dto/create-cake-like.dto';
 import { CreateStoreLikeDto } from './dto/create-store-like.dto';
+import calculateDistance from 'src/utils/distance-query-utils';
 
 @Injectable()
 export class LikesRepository {
@@ -140,33 +141,12 @@ export class LikesRepository {
       },
       {
         $addFields: {
-          distance: {
-            $multiply: [
-              6371,
-              {
-                $sqrt: {
-                  $add: [
-                    {
-                      $pow: [
-                        {
-                          $subtract: ['$store.latitude', userLatitude],
-                        },
-                        2,
-                      ],
-                    },
-                    {
-                      $pow: [
-                        {
-                          $subtract: ['$store.longitude', userLongitude],
-                        },
-                        2,
-                      ],
-                    },
-                  ],
-                },
-              },
-            ],
-          },
+          distance: calculateDistance(
+            userLatitude,
+            userLongitude,
+            '$store.latitude',
+            '$store.longitude',
+          ),
         },
       },
       {
@@ -265,33 +245,12 @@ export class LikesRepository {
       },
       {
         $addFields: {
-          distance: {
-            $multiply: [
-              6371,
-              {
-                $sqrt: {
-                  $add: [
-                    {
-                      $pow: [
-                        {
-                          $subtract: ['$store.latitude', userLatitude],
-                        },
-                        2,
-                      ],
-                    },
-                    {
-                      $pow: [
-                        {
-                          $subtract: ['$store.longitude', userLongitude],
-                        },
-                        2,
-                      ],
-                    },
-                  ],
-                },
-              },
-            ],
-          },
+          distance: calculateDistance(
+            userLatitude,
+            userLongitude,
+            '$store.latitude',
+            '$store.longitude',
+          ),
         },
       },
       {
@@ -363,10 +322,6 @@ export class LikesRepository {
   }
 
   async createStoreLike(createStoreLikeDto: CreateStoreLikeDto) {
-    const store = await this.storeModel.findById(createStoreLikeDto.storeId);
-    if (!store) {
-      throw new NotFoundException('Invalid store id');
-    }
     const isExist = await this.storeLikeModel.findOne({
       userId: createStoreLikeDto.userId,
       storeId: createStoreLikeDto.storeId,

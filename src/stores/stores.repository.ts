@@ -7,6 +7,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { ObjectId } from 'mongodb';
 import { Model } from 'mongoose';
 import { CreateStoreDto } from './dto/create-store.dto';
+import calculateDistance from 'src/utils/distance-query-utils';
 
 @Injectable()
 export class StoresRepository {
@@ -56,19 +57,12 @@ export class StoresRepository {
       },
       {
         $addFields: {
-          distance: {
-            $multiply: [
-              6371,
-              {
-                $sqrt: {
-                  $add: [
-                    { $pow: [{ $subtract: ['$latitude', userLatitude] }, 2] },
-                    { $pow: [{ $subtract: ['$longitude', userLongitude] }, 2] },
-                  ],
-                },
-              },
-            ],
-          },
+          distance: calculateDistance(
+            userLatitude,
+            userLongitude,
+            '$latitude',
+            '$longitude',
+          ),
         },
       },
       {
@@ -123,7 +117,7 @@ export class StoresRepository {
               {
                 $sortArray: {
                   input: '$popularCakes',
-                  sortBy: { popularity: -1 },
+                  sortBy: { popularity: -1, createdDate: -1 },
                 },
               },
               10,
@@ -240,7 +234,7 @@ export class StoresRepository {
               {
                 $sortArray: {
                   input: '$popularCakes',
-                  sortBy: { popularity: -1 },
+                  sortBy: { popularity: -1, createdDate: -1 },
                 },
               },
               10,
@@ -416,29 +410,12 @@ export class StoresRepository {
       },
       {
         $addFields: {
-          distance: {
-            $multiply: [
-              6371,
-              {
-                $sqrt: {
-                  $add: [
-                    {
-                      $pow: [
-                        { $subtract: ['$store.latitude', userLatitude] },
-                        2,
-                      ],
-                    },
-                    {
-                      $pow: [
-                        { $subtract: ['$store.longitude', userLongitude] },
-                        2,
-                      ],
-                    },
-                  ],
-                },
-              },
-            ],
-          },
+          distance: calculateDistance(
+            userLatitude,
+            userLongitude,
+            '$store.latitude',
+            '$store.longitude',
+          ),
         },
       },
       {
@@ -562,23 +539,12 @@ export class StoresRepository {
           latitude: '$latitude',
           longitude: '$longitude',
           info: '$info',
-          distance: {
-            $multiply: [
-              6371,
-              {
-                $sqrt: {
-                  $add: [
-                    {
-                      $pow: [{ $subtract: ['$latitude', userLatitude] }, 2],
-                    },
-                    {
-                      $pow: [{ $subtract: ['$longitude', userLongitude] }, 2],
-                    },
-                  ],
-                },
-              },
-            ],
-          },
+          distance: calculateDistance(
+            userLatitude,
+            userLongitude,
+            '$latitude',
+            '$longitude',
+          ),
           sizes: '$sizes',
           shapes: '$shapes',
         },
@@ -598,28 +564,16 @@ export class StoresRepository {
     userLongitude: number,
   ) {
     const maxDistanceInKm = 5;
-    const earthRadiusInKm = 6371;
 
     const nearbyStores = this.storeModel.aggregate([
       {
         $addFields: {
-          distance: {
-            $multiply: [
-              earthRadiusInKm,
-              {
-                $sqrt: {
-                  $add: [
-                    {
-                      $pow: [{ $subtract: ['$latitude', userLatitude] }, 2],
-                    },
-                    {
-                      $pow: [{ $subtract: ['$longitude', userLongitude] }, 2],
-                    },
-                  ],
-                },
-              },
-            ],
-          },
+          distance: calculateDistance(
+            userLatitude,
+            userLongitude,
+            '$latitude',
+            '$longitude',
+          ),
         },
       },
       {
@@ -628,11 +582,6 @@ export class StoresRepository {
           localField: '_id',
           foreignField: 'storeId',
           as: 'storeLikes',
-        },
-      },
-      {
-        $unwind: {
-          path: '$storeLikes',
         },
       },
       {
@@ -671,13 +620,7 @@ export class StoresRepository {
             longitude: '$longitude',
           },
           isLiked: {
-            $first: {
-              $cond: {
-                if: { $eq: ['$storeLikes.userId', new ObjectId(uid)] },
-                then: true,
-                else: false,
-              },
-            },
+            $first: { $in: [new ObjectId(uid), '$storeLikes.userId'] },
           },
           popularCakes: {
             $push: {
@@ -703,7 +646,7 @@ export class StoresRepository {
               {
                 $sortArray: {
                   input: '$popularCakes',
-                  sortBy: { popularity: -1 },
+                  sortBy: { popularity: -1, createdDate: -1 },
                 },
               },
               10,

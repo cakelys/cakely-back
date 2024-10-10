@@ -5,6 +5,7 @@ import { ObjectId } from 'mongodb';
 import { Store } from 'src/stores/entities/store.entity';
 import { Cake } from './entities/cake.entity';
 import { CreateCakeDto } from './dto/create-cake.dto';
+import calculateDistance from 'src/utils/distance-query-utils';
 
 @Injectable()
 export class CakesRepository {
@@ -117,29 +118,12 @@ export class CakesRepository {
       },
       {
         $addFields: {
-          distance: {
-            $multiply: [
-              6371,
-              {
-                $sqrt: {
-                  $add: [
-                    {
-                      $pow: [
-                        { $subtract: ['$store.latitude', userLatitude] },
-                        2,
-                      ],
-                    },
-                    {
-                      $pow: [
-                        { $subtract: ['$store.longitude', userLongitude] },
-                        2,
-                      ],
-                    },
-                  ],
-                },
-              },
-            ],
-          },
+          distance: calculateDistance(
+            userLatitude,
+            userLongitude,
+            '$store.latitude',
+            '$store.longitude',
+          ),
         },
       },
       {
@@ -207,40 +191,24 @@ export class CakesRepository {
         },
       },
       {
-        $unwind: {
-          path: '$store',
+        $addFields: {
+          store: { $arrayElemAt: ['$store', 0] },
         },
       },
       {
         $addFields: {
-          distance: {
-            $multiply: [
-              6371,
-              {
-                $sqrt: {
-                  $add: [
-                    {
-                      $pow: [
-                        { $subtract: ['$store.latitude', userLatitude] },
-                        2,
-                      ],
-                    },
-                    {
-                      $pow: [
-                        { $subtract: ['$store.longitude', userLongitude] },
-                        2,
-                      ],
-                    },
-                  ],
-                },
-              },
-            ],
-          },
+          distance: calculateDistance(
+            userLatitude,
+            userLongitude,
+            '$store.latitude',
+            '$store.longitude',
+          ),
         },
       },
       {
         $sort: {
           [sortCriteria]: sortCriteria === 'distance' ? 1 : -1,
+          'store.createdDate': -1,
         },
       },
       {
@@ -322,29 +290,12 @@ export class CakesRepository {
       },
       {
         $addFields: {
-          distance: {
-            $multiply: [
-              6371,
-              {
-                $sqrt: {
-                  $add: [
-                    {
-                      $pow: [
-                        { $subtract: ['$store.latitude', userLatitude] },
-                        2,
-                      ],
-                    },
-                    {
-                      $pow: [
-                        { $subtract: ['$store.longitude', userLongitude] },
-                        2,
-                      ],
-                    },
-                  ],
-                },
-              },
-            ],
-          },
+          distance: calculateDistance(
+            userLatitude,
+            userLongitude,
+            '$store.latitude',
+            '$store.longitude',
+          ),
         },
       },
       {
@@ -569,13 +520,7 @@ export class CakesRepository {
           from: 'cakeLikes',
           localField: '_id',
           foreignField: 'cakeId',
-          as: 'likes',
-        },
-      },
-      {
-        $unwind: {
-          path: '$likes',
-          preserveNullAndEmptyArrays: true,
+          as: 'cakeLikes',
         },
       },
       {
@@ -587,8 +532,8 @@ export class CakesRepository {
         },
       },
       {
-        $unwind: {
-          path: '$store',
+        $addFields: {
+          store: { $arrayElemAt: ['$store', 0] },
         },
       },
       {
@@ -596,13 +541,7 @@ export class CakesRepository {
           from: 'storeLikes',
           localField: 'store._id',
           foreignField: 'storeId',
-          as: 'result',
-        },
-      },
-      {
-        $unwind: {
-          path: '$result',
-          preserveNullAndEmptyArrays: true,
+          as: 'storeLikes',
         },
       },
       {
@@ -611,24 +550,10 @@ export class CakesRepository {
           cake: {
             id: '$_id',
             photo: { $arrayElemAt: ['$photos', 0] },
-            isLiked: {
-              $cond: {
-                if: {
-                  $eq: ['$likes.userId', new ObjectId(uid)],
-                },
-                then: true,
-                else: false,
-              },
-            },
+            isLiked: { $in: [new ObjectId(uid), '$cakeLikes.userId'] },
           },
           'store.isLiked': {
-            $cond: {
-              if: {
-                $eq: ['$result.userId', new ObjectId(uid)],
-              },
-              then: true,
-              else: false,
-            },
+            $in: [new ObjectId(uid), '$storeLikes.userId'],
           },
           'store.id': '$store._id',
           'store.name': 1,
