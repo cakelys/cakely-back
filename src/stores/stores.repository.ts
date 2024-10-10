@@ -565,7 +565,7 @@ export class StoresRepository {
   ) {
     const maxDistanceInKm = 5;
 
-    const nearbyStores = this.storeModel.aggregate([
+    const nearbyStores = await this.storeModel.aggregate([
       {
         $addFields: {
           distance: calculateDistance(
@@ -593,59 +593,12 @@ export class StoresRepository {
         },
       },
       {
-        $unwind: {
-          path: '$cakes',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $lookup: {
-          from: 'cakeLikes',
-          localField: 'cakes._id',
-          foreignField: 'cakeId',
-          as: 'cakeLikes',
-        },
-      },
-      {
-        $group: {
-          _id: {
-            storeId: '$_id',
-            name: '$name',
-            address: '$address',
-            logo: '$logo',
-            distance: '$distance',
-            popularity: '$popularity',
-            createdDate: '$createdDate',
-            latitude: '$latitude',
-            longitude: '$longitude',
-          },
-          isLiked: {
-            $first: { $in: [new ObjectId(uid), '$storeLikes.userId'] },
-          },
-          popularCakes: {
-            $push: {
-              id: '$cakes._id',
-              photo: { $arrayElemAt: ['$cakes.photos', 0] },
-              isLiked: {
-                $cond: {
-                  if: {
-                    $in: [new ObjectId(uid), '$cakeLikes.userId'],
-                  },
-                  then: true,
-                  else: false,
-                },
-              },
-            },
-          },
-        },
-      },
-      {
         $addFields: {
           popularCakes: {
             $slice: [
               {
                 $sortArray: {
-                  input: '$popularCakes',
+                  input: '$cakes',
                   sortBy: { popularity: -1, createdDate: -1 },
                 },
               },
@@ -655,40 +608,74 @@ export class StoresRepository {
         },
       },
       {
-        $addFields: {
-          popularCakes: {
-            $cond: {
-              if: {
-                $and: [
-                  { $eq: [{ $size: '$popularCakes' }, 1] },
-                  {
-                    $eq: [{ $arrayElemAt: ['$popularCakes.photo', 0] }, null],
-                  },
-                ],
+        $lookup: {
+          from: 'cakeLikes',
+          let: { cakeIds: '$popularCakes._id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $in: ['$cakeId', '$$cakeIds'] },
               },
-              then: [],
-              else: '$popularCakes',
             },
-          },
+            {
+              $project: {
+                cakeId: 1,
+                userId: 1,
+              },
+            },
+          ],
+          as: 'cakeLikes',
         },
       },
       {
         $match: {
-          '_id.distance': { $lte: maxDistanceInKm },
+          distance: { $lte: maxDistanceInKm },
+        },
+      },
+      {
+        $addFields: {
+          popularCakes: {
+            $map: {
+              input: '$popularCakes',
+              as: 'cake',
+              in: {
+                id: '$$cake._id',
+                photo: { $arrayElemAt: ['$$cake.photos', 0] },
+                isLiked: {
+                  $in: [
+                    { $toObjectId: uid },
+                    {
+                      $map: {
+                        input: '$cakeLikes',
+                        as: 'like',
+                        in: {
+                          $cond: [
+                            { $eq: ['$$like.cakeId', '$$cake._id'] },
+                            '$$like.userId',
+                            null,
+                          ],
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
         },
       },
       {
         $project: {
           _id: 0,
           store: {
-            id: '$_id.storeId',
-            name: '$_id.name',
-            address: '$_id.address',
-            logo: '$_id.logo',
-            distance: '$_id.distance',
-            isLiked: '$isLiked',
-            latitude: '$_id.latitude',
-            longitude: '$_id.longitude',
+            id: '$_id',
+            name: '$name',
+            address: '$address',
+            logo: '$logo',
+            distance: '$distance',
+            isLiked: { $in: [new ObjectId(uid), '$storeLikes.userId'] },
+            latitude: '$latitude',
+            longitude: '$longitude',
           },
           popularCakes: 1,
         },
