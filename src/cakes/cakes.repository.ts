@@ -20,13 +20,7 @@ export class CakesRepository {
           from: 'cakeLikes',
           localField: '_id',
           foreignField: 'cakeId',
-          as: 'likes',
-        },
-      },
-      {
-        $unwind: {
-          path: '$likes',
-          preserveNullAndEmptyArrays: true,
+          as: 'cakeLikes',
         },
       },
       {
@@ -38,8 +32,8 @@ export class CakesRepository {
         },
       },
       {
-        $unwind: {
-          path: '$store',
+        $addFields: {
+          store: { $arrayElemAt: ['$store', 0] },
         },
       },
       {
@@ -47,13 +41,7 @@ export class CakesRepository {
           from: 'storeLikes',
           localField: 'store._id',
           foreignField: 'storeId',
-          as: 'result',
-        },
-      },
-      {
-        $unwind: {
-          path: '$result',
-          preserveNullAndEmptyArrays: true,
+          as: 'storeLikes',
         },
       },
       {
@@ -62,26 +50,10 @@ export class CakesRepository {
           cake: {
             id: '$_id',
             photo: { $arrayElemAt: ['$photos', 0] },
-            isLiked: {
-              $cond: {
-                if: {
-                  $eq: ['$likes.userId', new ObjectId(uid)],
-                },
-                then: true,
-                else: false,
-              },
-            },
+            isLiked: { $in: [new ObjectId(uid), '$cakeLikes.userId'] },
             createdDate: '$createdDate',
           },
-          'store.isLiked': {
-            $cond: {
-              if: {
-                $eq: ['$result.userId', new ObjectId(uid)],
-              },
-              then: true,
-              else: false,
-            },
-          },
+          'store.isLiked': { $in: [new ObjectId(uid), '$storeLikes.userId'] },
           'store.id': '$store._id',
           'store.name': 1,
           'store.logo': 1,
@@ -89,14 +61,7 @@ export class CakesRepository {
         },
       },
       {
-        $sort: {
-          'cake.createdDate': -1,
-        },
-      },
-      {
-        $project: {
-          'cake.createdDate': 0,
-        },
+        $sort: { 'cake.createdDate': -1 },
       },
       {
         $limit: 5,
@@ -225,13 +190,7 @@ export class CakesRepository {
           from: 'cakeLikes',
           localField: '_id',
           foreignField: 'cakeId',
-          as: 'result',
-        },
-      },
-      {
-        $unwind: {
-          path: '$result',
-          preserveNullAndEmptyArrays: true,
+          as: 'cakeLikes',
         },
       },
       {
@@ -289,15 +248,7 @@ export class CakesRepository {
           _id: 0,
           id: '$_id',
           photo: { $arrayElemAt: ['$photos', 0] },
-          isLiked: {
-            $cond: {
-              if: {
-                $eq: ['$result.userId', new ObjectId(uid)],
-              },
-              then: true,
-              else: false,
-            },
-          },
+          isLiked: { $in: [new ObjectId(uid), '$cakeLikes.userId'] },
         },
       },
       {
