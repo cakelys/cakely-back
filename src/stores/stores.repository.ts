@@ -107,6 +107,7 @@ export class StoresRepository {
       },
       {
         $project: {
+          _id: 0,
           store: {
             id: '$_id',
             name: '$name',
@@ -114,6 +115,8 @@ export class StoresRepository {
             logo: '$logo',
             distance: '$distance',
             isLiked: '$isLiked',
+            popularity: '$popularity',
+            createdDate: '$createdDate',
           },
           popularCakes: {
             $slice: [
@@ -131,6 +134,13 @@ export class StoresRepository {
       {
         $sort: {
           [`store.${sortCriteria}`]: sortCriteria === 'distance' ? 1 : -1,
+          'store.createdDate': -1,
+        },
+      },
+      {
+        $project: {
+          'store.popularity': 0,
+          'store.createdDate': 0,
         },
       },
       { $skip: skip },
