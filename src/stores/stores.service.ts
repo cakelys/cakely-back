@@ -214,4 +214,8 @@ export class StoresService {
   async getOldestStores() {
     return this.storesRepository.getOldestStores();
   }
+
+  async deleteStore(storeId: string[]) {
+    return this.storesRepository.deleteStore(storeId);
+  }
 }

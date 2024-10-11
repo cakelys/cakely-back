@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { StoresService } from './stores.service';
 import {
   setDefaultSort,
@@ -122,5 +130,10 @@ export class StoresController {
   @Post()
   createStore(@Body() body: any) {
     return this.storesService.createStore(body);
+  }
+
+  @Delete('')
+  deleteStore(@Body('storeIds') storeIds: string[]) {
+    return this.storesService.deleteStore(storeIds);
   }
 }
