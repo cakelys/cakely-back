@@ -59,6 +59,11 @@ export class StoresController {
     return this.storesService.searchStores(keyword);
   }
 
+  @Get('oldest')
+  getOldestStores() {
+    return this.storesService.getOldestStores();
+  }
+
   @Get(':storeId')
   getStore(@Param('storeId') storeId: string) {
     const uid = '665f134a0dfff9c6393100d5';

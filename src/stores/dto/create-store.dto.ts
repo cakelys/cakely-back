@@ -18,4 +18,6 @@ export class CreateStoreDto {
   shapes: string[];
 
   popularity: number;
+
+  isChecked: boolean;
 }

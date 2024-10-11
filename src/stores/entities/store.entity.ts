@@ -42,5 +42,8 @@ export class Store extends Document {
 
   @Prop({})
   popularity: number;
+
+  @Prop({ type: Boolean, default: false })
+  isChecked: boolean;
 }
 export const StoreSchema = SchemaFactory.createForClass(Store);

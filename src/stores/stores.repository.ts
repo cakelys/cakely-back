@@ -721,4 +721,33 @@ export class StoresRepository {
 
     return stores;
   }
+
+  async getOldestStores() {
+    const oldestStores = await this.storeModel.aggregate([
+      {
+        $match: {
+          isChecked: false,
+        },
+      },
+      {
+        $sort: {
+          createdDate: 1,
+        },
+      },
+      {
+        $limit: 18,
+      },
+      {
+        $project: {
+          _id: 0,
+          id: '$_id',
+          name: 1,
+          address: 1,
+          logo: 1,
+        },
+      },
+    ]);
+
+    return oldestStores;
+  }
 }

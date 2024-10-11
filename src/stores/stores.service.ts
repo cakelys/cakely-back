@@ -210,4 +210,8 @@ export class StoresService {
   async searchStores(keyword: string) {
     return this.storesRepository.searchStores(keyword);
   }
+
+  async getOldestStores() {
+    return this.storesRepository.getOldestStores();
+  }
 }
