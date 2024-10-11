@@ -697,4 +697,28 @@ export class StoresRepository {
     const newStore = new this.storeModel(createStoreDto);
     return newStore.save();
   }
+
+  async searchStores(keyword: string) {
+    const stores = await this.storeModel.aggregate([
+      {
+        $match: {
+          $or: [
+            { name: { $regex: keyword, $options: 'i' } },
+            { address: { $regex: keyword, $options: 'i' } },
+          ],
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          id: '$_id',
+          name: 1,
+          address: 1,
+          logo: 1,
+        },
+      },
+    ]);
+
+    return stores;
+  }
 }

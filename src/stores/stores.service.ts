@@ -206,4 +206,8 @@ export class StoresService {
     createStoreDto['logo'] = `${createStoreDto.instarId}/logo.png`;
     return this.storesRepository.createStore(createStoreDto);
   }
+
+  async searchStores(keyword: string) {
+    return this.storesRepository.searchStores(keyword);
+  }
 }

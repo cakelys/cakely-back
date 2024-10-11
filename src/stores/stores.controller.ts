@@ -54,6 +54,11 @@ export class StoresController {
     return this.storesService.getNearbyStores(uid, latitude, longitude);
   }
 
+  @Get('search')
+  searchStores(@Query('keyword') keyword: string) {
+    return this.storesService.searchStores(keyword);
+  }
+
   @Get(':storeId')
   getStore(@Param('storeId') storeId: string) {
     const uid = '665f134a0dfff9c6393100d5';
