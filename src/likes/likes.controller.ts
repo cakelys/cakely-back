@@ -37,6 +37,14 @@ export class LikesController {
         latitude,
         longitude,
       );
+    } else if (latitude && longitude) {
+      return this.likesService.getAllStoreLikes(
+        uid,
+        defaultSortBy,
+        page,
+        latitude,
+        longitude,
+      );
     }
     return this.likesService.getAllStoreLikes(uid, defaultSortBy, page);
   }
@@ -54,6 +62,14 @@ export class LikesController {
     validateRequiredField('page', page);
     if (defaultSortBy === 'distance') {
       validateCoordinates(latitude, longitude);
+      return this.likesService.getAllLikedCakes(
+        uid,
+        defaultSortBy,
+        page,
+        latitude,
+        longitude,
+      );
+    } else if (latitude && longitude) {
       return this.likesService.getAllLikedCakes(
         uid,
         defaultSortBy,

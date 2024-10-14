@@ -33,6 +33,14 @@ export class CakesController {
         latitude,
         longitude,
       );
+    } else if (latitude && longitude) {
+      return this.cakesService.getRecommendCakes(
+        uid,
+        defaultSortBy,
+        page,
+        latitude,
+        longitude,
+      );
     }
     return this.cakesService.getRecommendCakes(uid, defaultSortBy, page);
   }
@@ -59,6 +67,15 @@ export class CakesController {
     validateRequiredField('page', page);
     if (defaultSortBy === 'distance') {
       validateCoordinates(latitude, longitude);
+      return this.cakesService.getCategoryCakes(
+        uid,
+        category,
+        defaultSortBy,
+        page,
+        latitude,
+        longitude,
+      );
+    } else if (latitude && longitude) {
       return this.cakesService.getCategoryCakes(
         uid,
         category,
