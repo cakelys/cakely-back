@@ -109,6 +109,10 @@ export class StoresService {
     return storeCakes;
   }
 
+  async getStoreAllCakes(storeId: string) {
+    return this.storesRepository.getStoreAllCakes(storeId);
+  }
+
   async getStoreCake(
     uid: string,
     storeId: string,

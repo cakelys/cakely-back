@@ -88,6 +88,11 @@ export class StoresController {
     return this.storesService.getStoreCakes(uid, storeId, page);
   }
 
+  @Get(':storeId/all-cakes')
+  getStoreAllCakes(@Param('storeId') storeId: string) {
+    return this.storesService.getStoreAllCakes(storeId);
+  }
+
   @Get(':storeId/cakes/:cakeId')
   getStoreCake(
     @Param('storeId') storeId: string,

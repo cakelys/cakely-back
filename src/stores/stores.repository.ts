@@ -350,6 +350,68 @@ export class StoresRepository {
     return storeCakes;
   }
 
+  async getStoreAllCakes(storeId: string) {
+    const allCakes = await this.storeModel.aggregate([
+      {
+        $match: {
+          _id: new ObjectId(storeId),
+        },
+      },
+      {
+        $lookup: {
+          from: 'cakes',
+          localField: '_id',
+          foreignField: 'storeId',
+          as: 'cakes',
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          store: {
+            id: '$_id',
+            name: '$name',
+            instarId: '$instarId',
+            address: '$address',
+            latitude: '$latitude',
+            longitude: '$longitude',
+            logo: '$logo',
+            info: '$info',
+            siteUrl: '$siteUrl',
+            sizes: '$sizes',
+            shapes: '$shapes',
+            popularity: '$popularity',
+            createdDate: '$createdDate',
+            isChecked: '$isChecked',
+          },
+          cakes: {
+            $map: {
+              input: {
+                $sortArray: {
+                  input: '$cakes',
+                  sortBy: { createdDate: -1 },
+                },
+              },
+              as: 'cake',
+              in: {
+                id: '$$cake._id',
+                photos: '$$cake.photos',
+                categories: '$$cake.categories',
+                popularity: '$$cake.popularity',
+              },
+            },
+          },
+        },
+      },
+    ]);
+
+    if (allCakes.length <= 0) {
+      throw new NotFoundException('해당 스토어의 케이크를 찾을 수 없습니다.');
+    }
+
+    return allCakes[0];
+  }
+
   async getStoreCake(
     uid: string,
     storeId: string,
