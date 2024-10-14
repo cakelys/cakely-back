@@ -11,6 +11,10 @@ import {
   StoreLike,
   StoreLikeSchema,
 } from 'src/likes/entities/storeLike.entity';
+import {
+  PendingS3Deletion,
+  PendingS3DeletionSchema,
+} from 'src/s3/entities/pendingS3Deletion.entity';
 
 @Module({
   imports: [
@@ -19,6 +23,7 @@ import {
       { name: Cake.name, schema: CakeSchema },
       { name: CakeLike.name, schema: CakeLikeSchema },
       { name: StoreLike.name, schema: StoreLikeSchema },
+      { name: PendingS3Deletion.name, schema: PendingS3DeletionSchema },
     ]),
   ],
   controllers: [StoresController],

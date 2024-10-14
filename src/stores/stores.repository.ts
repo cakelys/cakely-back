@@ -1,3 +1,4 @@
+import { PendingS3Deletion } from './../s3/entities/pendingS3Deletion.entity';
 import {
   ConflictException,
   Injectable,
@@ -20,6 +21,8 @@ export class StoresRepository {
     @InjectModel('Cake') private readonly cakeModel: Model<Cake>,
     @InjectModel('StoreLike') private readonly storeLikeModel: Model<StoreLike>,
     @InjectModel('CakeLike') private readonly cakeLikeModel: Model<CakeLike>,
+    @InjectModel('PendingS3Deletion')
+    private readonly pendingS3DeletionModel: Model<PendingS3Deletion>,
   ) {}
 
   async getAllStores(
@@ -819,20 +822,35 @@ export class StoresRepository {
     return oldestStores;
   }
 
-  async deleteStore(storeId: string[]): Promise<any> {
+  async deleteStores(storeIds: string[]): Promise<any> {
     const session = await this.storeModel.startSession();
     session.startTransaction();
 
     try {
-      const storeObjectIds = storeId.map((id) => new ObjectId(id));
-      const deletedStores = await this.storeModel.deleteMany(
+      const storeObjectIds = storeIds.map((storeId) => new ObjectId(storeId));
+
+      const deletedStores = await this.storeModel
+        .find({ _id: { $in: storeObjectIds } })
+        .session(session);
+
+      if (deletedStores.length !== storeIds.length) {
+        throw new NotFoundException('해당 스토어를 찾을 수 없습니다.');
+      }
+
+      await this.storeModel.deleteMany(
         { _id: { $in: storeObjectIds } },
         { session },
       );
 
-      if (deletedStores.deletedCount !== storeId.length) {
-        throw new NotFoundException('해당 스토어를 찾을 수 없습니다.');
-      }
+      const pendingS3Deletions = deletedStores.map((store) => {
+        return {
+          s3Key: store.instarId,
+        };
+      });
+
+      await this.pendingS3DeletionModel.insertMany(pendingS3Deletions, {
+        session,
+      });
 
       const cakeIds = await this.cakeModel
         .find({

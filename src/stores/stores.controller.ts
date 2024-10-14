@@ -138,7 +138,7 @@ export class StoresController {
   }
 
   @Delete('')
-  deleteStore(@Body('storeIds') storeIds: string[]) {
-    return this.storesService.deleteStore(storeIds);
+  deleteStores(@Body('storeIds') storeIds: string[]) {
+    return this.storesService.deleteStores(storeIds);
   }
 }
