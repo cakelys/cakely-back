@@ -1,4 +1,12 @@
-import { Controller, Get, Param, Query, Body, Post } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Query,
+  Body,
+  Post,
+  Delete,
+} from '@nestjs/common';
 import { CakesService } from './cakes.service';
 import {
   setDefaultSort,
@@ -131,5 +139,10 @@ export class CakesController {
       return this.cakesService.getCakeById(uid, cakeId, latitude, longitude);
     }
     return this.cakesService.getCakeById(uid, cakeId);
+  }
+
+  @Delete()
+  async deleteCakes(@Body('cakeIds') cakeIds: string[]) {
+    return this.cakesService.deleteCakes(cakeIds);
   }
 }

@@ -6,12 +6,14 @@ import { Store } from 'src/stores/entities/store.entity';
 import { Cake } from './entities/cake.entity';
 import { CreateCakeDto } from './dto/create-cake.dto';
 import calculateDistance from 'src/utils/distance-query-utils';
+import { CakeLike } from 'src/likes/entities/cakeLike.entity';
 
 @Injectable()
 export class CakesRepository {
   constructor(
     @InjectModel('Cake') private readonly cakeModel: Model<Cake>,
     @InjectModel('Store') private readonly storeModel: Model<Store>,
+    @InjectModel('CakeLike') private readonly cakeLikeModel: Model<CakeLike>,
   ) {}
 
   async getTodayCakesData(uid: string): Promise<any> {
@@ -564,5 +566,34 @@ export class CakesRepository {
     ]);
 
     return worldCupWinner[0];
+  }
+
+  async deleteCakes(cakeIds: string[]) {
+    const session = await this.storeModel.startSession();
+    session.startTransaction();
+
+    try {
+      const cakeObjectIds = cakeIds.map((cakeId) => new ObjectId(cakeId));
+      const deletedCakes = await this.cakeModel.deleteMany(
+        { _id: { $in: cakeObjectIds } },
+        { session },
+      );
+
+      if (deletedCakes.deletedCount !== cakeIds.length) {
+        throw new NotFoundException('해당 케이크를 찾을 수 없습니다.');
+      }
+
+      await this.cakeLikeModel.deleteMany(
+        { cakeId: { $in: cakeObjectIds } },
+        { session },
+      );
+
+      await session.commitTransaction();
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
+    }
   }
 }

@@ -202,4 +202,8 @@ export class CakesService {
       );
     return worldCupWinner;
   }
+
+  async deleteCakes(cakeIds: string[]) {
+    await this.cakesRepository.deleteCakes(cakeIds);
+  }
 }
