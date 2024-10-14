@@ -35,7 +35,7 @@ export class StoresRepository {
     const pageSize = 10;
     const skip = (page - 1) * pageSize;
 
-    return this.storeModel.aggregate([
+    const stores = await this.storeModel.aggregate([
       {
         $lookup: {
           from: 'storeLikes',
@@ -57,14 +57,6 @@ export class StoresRepository {
         },
       },
       {
-        $lookup: {
-          from: 'cakes',
-          localField: '_id',
-          foreignField: 'storeId',
-          as: 'cakes',
-        },
-      },
-      {
         $addFields: {
           distance: calculateDistance(
             userLatitude,
@@ -72,40 +64,6 @@ export class StoresRepository {
             '$latitude',
             '$longitude',
           ),
-        },
-      },
-      {
-        $lookup: {
-          from: 'cakeLikes',
-          localField: 'cakes._id',
-          foreignField: 'cakeId',
-          as: 'cakeLikes',
-        },
-      },
-      {
-        $addFields: {
-          popularCakes: {
-            $map: {
-              input: '$cakes',
-              as: 'cake',
-              in: {
-                id: '$$cake._id',
-                photo: { $arrayElemAt: ['$$cake.photos', 0] },
-                isLiked: {
-                  $in: [
-                    new ObjectId(uid),
-                    {
-                      $map: {
-                        input: '$cakeLikes',
-                        as: 'like',
-                        in: '$$like.userId',
-                      },
-                    },
-                  ],
-                },
-              },
-            },
-          },
         },
       },
       {
@@ -120,17 +78,6 @@ export class StoresRepository {
             isLiked: '$isLiked',
             popularity: '$popularity',
             createdDate: '$createdDate',
-          },
-          popularCakes: {
-            $slice: [
-              {
-                $sortArray: {
-                  input: '$popularCakes',
-                  sortBy: { popularity: -1, createdDate: -1 },
-                },
-              },
-              10,
-            ],
           },
         },
       },
@@ -149,6 +96,46 @@ export class StoresRepository {
       { $skip: skip },
       { $limit: pageSize },
     ]);
+
+    for (const storeInfo of stores) {
+      const popularCakes = await this.cakeModel.aggregate([
+        {
+          $match: {
+            storeId: storeInfo.store.id,
+          },
+        },
+        {
+          $lookup: {
+            from: 'cakeLikes',
+            localField: '_id',
+            foreignField: 'cakeId',
+            as: 'cakeLikes',
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            id: '$_id',
+            photo: { $arrayElemAt: ['$photos', 0] },
+            isLiked: {
+              $in: [new ObjectId(uid), '$cakeLikes.userId'],
+            },
+          },
+        },
+        {
+          $sort: {
+            popularity: -1,
+            createdDate: -1,
+          },
+        },
+        {
+          $limit: 10,
+        },
+      ]);
+      storeInfo.popularCakes = popularCakes;
+    }
+
+    return stores;
   }
 
   async getStoreById(uid: string, storeId: string): Promise<any> {
