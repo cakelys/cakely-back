@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Param, Delete, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Delete,
+  Query,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { LikesService } from './likes.service';
 import {
   setDefaultSort,
@@ -6,14 +15,16 @@ import {
   validateRequiredField,
   validateSortBy,
 } from 'src/utils/validation-utils';
+import { AuthGuard } from 'src/auth/auth.guard';
 
+@UseGuards(AuthGuard)
 @Controller('likes')
 export class LikesController {
   constructor(private readonly likesService: LikesService) {}
 
   @Get('stores/new-cakes')
-  getNewCakesInLikedStores() {
-    const uid = '665f134a0dfff9c6393100d5';
+  getNewCakesInLikedStores(@Req() request) {
+    const uid = request.userId;
     return this.likesService.getNewCakesInLikedStores(uid);
   }
 
@@ -23,8 +34,9 @@ export class LikesController {
     @Query('sortBy') sortBy: string,
     @Query('latitude') latitude: string,
     @Query('longitude') longitude: string,
+    @Req() request,
   ) {
-    const uid = '665f134a0dfff9c6393100d5';
+    const uid = request.userId;
     const defaultSortBy = setDefaultSort(sortBy);
     validateSortBy(defaultSortBy);
     validateRequiredField('page', page);
@@ -55,8 +67,9 @@ export class LikesController {
     @Query('sortBy') sortBy: string,
     @Query('latitude') latitude: string,
     @Query('longitude') longitude: string,
+    @Req() request,
   ) {
-    const uid = '665f134a0dfff9c6393100d5';
+    const uid = request.userId;
     const defaultSortBy = setDefaultSort(sortBy);
     validateSortBy(defaultSortBy);
     validateRequiredField('page', page);
@@ -82,26 +95,26 @@ export class LikesController {
   }
 
   @Post('cakes/:cakeId')
-  createCakeLike(@Param('cakeId') cakeId: string) {
-    const uid = '665f134a0dfff9c6393100d5';
+  createCakeLike(@Param('cakeId') cakeId: string, @Req() request) {
+    const uid = request.userId;
     return this.likesService.createCakeLike(uid, cakeId);
   }
 
   @Post('stores/:storeId')
-  createStoreLike(@Param('storeId') storeId: string) {
-    const uid = '665f134a0dfff9c6393100d5';
+  createStoreLike(@Param('storeId') storeId: string, @Req() request) {
+    const uid = request.userId;
     return this.likesService.createStoreLike(uid, storeId);
   }
 
   @Delete('cakes/:cakeId')
-  deleteCakeLike(@Param('cakeId') cakeId: string) {
-    const uid = '665f134a0dfff9c6393100d5';
+  deleteCakeLike(@Param('cakeId') cakeId: string, @Req() request) {
+    const uid = request.userId;
     return this.likesService.deleteCakeLike(uid, cakeId);
   }
 
   @Delete('stores/:storeId')
-  deleteStoreLike(@Param('storeId') storeId: string) {
-    const uid = '665f134a0dfff9c6393100d5';
+  deleteStoreLike(@Param('storeId') storeId: string, @Req() request) {
+    const uid = request.userId;
     return this.likesService.deleteStoreLike(uid, storeId);
   }
 }
