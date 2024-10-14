@@ -11,6 +11,8 @@ import {
   PendingS3Deletion,
   PendingS3DeletionSchema,
 } from 'src/s3/entities/pendingS3Deletion.entity';
+import { FirebaseService } from 'src/auth/firebase.service';
+import { User, UsersSchema } from 'src/users/entities/user.entity';
 
 @Module({
   imports: [
@@ -19,9 +21,10 @@ import {
       { name: Store.name, schema: StoreSchema },
       { name: CakeLike.name, schema: CakeLikeSchema },
       { name: PendingS3Deletion.name, schema: PendingS3DeletionSchema },
+      { name: User.name, schema: UsersSchema },
     ]),
   ],
   controllers: [CakesController],
-  providers: [CakesService, CakesRepository, S3Service],
+  providers: [CakesService, CakesRepository, S3Service, FirebaseService],
 })
 export class CakesModule {}
