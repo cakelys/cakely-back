@@ -36,6 +36,12 @@ export class User extends Document {
 
   @Prop({ type: String, required: true })
   uid: string;
+
+  @Prop({ type: Date })
+  deletedDate: Date;
+
+  @Prop({ type: Date, default: Date.now })
+  lastLoginDate: Date;
 }
 
 export const UsersSchema = SchemaFactory.createForClass(User);

@@ -4,6 +4,7 @@ import { getAuth } from 'firebase-admin/auth';
 import { Model } from 'mongoose';
 import { AuthGetUserInfoDto } from './dto/auth-get-user-info.dto';
 import { User } from 'src/users/entities/user.entity';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class FirebaseService {
@@ -12,7 +13,6 @@ export class FirebaseService {
   ) {}
   async verifyAccessToken(accessToken: string): Promise<string> {
     if (!accessToken.startsWith('Bearer ')) {
-      console.log('Invalid token');
       throw new UnauthorizedException();
     }
 
@@ -20,16 +20,20 @@ export class FirebaseService {
       const parsedAccessToken = accessToken.substring(7, accessToken.length);
       const decodedToken = await getAuth().verifyIdToken(parsedAccessToken);
       const uid = decodedToken.uid;
-      return uid;
+      const userInfo = await this.userModel.findOneAndUpdate(
+        { uid, status: '활동' },
+        { lastLoginDate: new Date() },
+        { new: true },
+      );
+      return userInfo._id.toString();
     } catch (error) {
-      console.log(error);
       throw new UnauthorizedException();
     }
   }
 
-  async validateUser(uid: string): Promise<boolean> {
+  async validateUser(userId: string): Promise<boolean> {
     const userInfo = await this.userModel
-      .findOne({ uid: uid }, { _id: 0, status: 1 })
+      .findOne({ _id: new ObjectId(userId) }, { _id: 0, status: 1 })
       .exec();
 
     if (userInfo === null) {

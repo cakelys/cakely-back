@@ -11,6 +11,7 @@ import { Model } from 'mongoose';
 import { FirebaseService } from 'src/auth/firebase.service';
 import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class UsersRepository {
@@ -21,7 +22,7 @@ export class UsersRepository {
 
   async getUserInfo(uid: string) {
     const userInfo = await this.userModel.findOne(
-      { uid: uid },
+      { _id: new ObjectId(uid) },
       {
         _id: 0,
         nickname: 1,
@@ -41,7 +42,7 @@ export class UsersRepository {
 
   async logIn(uid: string) {
     const userInfo = await this.userModel.findOne(
-      { uid: uid },
+      { _id: new ObjectId(uid) },
       {
         _id: 0,
         nickname: 1,
@@ -69,14 +70,24 @@ export class UsersRepository {
     if (firebaseUser === 'Invalid token') {
       throw new UnauthorizedException('Invalid token');
     }
-    const userInfo = await this.userModel.findOne(
-      { uid: firebaseUser['uid'] },
-      { _id: 0, status: 1 },
-    );
+    const userInfo = await this.userModel
+      .findOne(
+        { uid: firebaseUser['uid'] },
+        { _id: 1, status: 1, deletedDate: 1 },
+      )
+      .sort({ deletedDate: -1 });
+
     if (userInfo) {
       if (userInfo.status === '탈퇴') {
-        // [TODO] 탈퇴한지 한달이 넘었는지 확인
-        throw new GoneException('This user has been withdrawn');
+        if (
+          new Date().getTime() - userInfo.deletedDate.getTime() <=
+          604800000
+        ) {
+          return await this.userModel.findOneAndUpdate(
+            { _id: userInfo._id },
+            { status: '활동', deletedDate: null },
+          );
+        }
       } else {
         throw new ConflictException('This email is already in use');
       }
@@ -98,8 +109,12 @@ export class UsersRepository {
   }
 
   async updateUserInfo(uid: string, updateUserDto: UpdateUserDto) {
+    if (updateUserDto.status === '탈퇴') {
+      updateUserDto.deletedDate = new Date();
+    }
+
     const userInfo = await this.userModel.findOneAndUpdate(
-      { uid: uid },
+      { _id: new ObjectId(uid) },
       updateUserDto,
       { new: true },
     );
