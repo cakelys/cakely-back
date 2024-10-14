@@ -772,9 +772,12 @@ export class StoresRepository {
         throw new NotFoundException('해당 스토어를 찾을 수 없습니다.');
       }
 
-      const cakeIds = await this.cakeModel.find({
-        storeId: { $in: storeObjectIds },
-      });
+      const cakeIds = await this.cakeModel
+        .find({
+          storeId: { $in: storeObjectIds },
+        })
+        .distinct('_id');
+
       await this.cakeLikeModel.deleteMany(
         { cakeId: { $in: cakeIds } },
         { session },
