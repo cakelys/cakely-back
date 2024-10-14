@@ -161,12 +161,6 @@ export class StoresRepository {
         },
       },
       {
-        $unwind: {
-          path: '$storeLikes',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
         $lookup: {
           from: 'cakes',
           localField: '_id',
@@ -199,11 +193,7 @@ export class StoresRepository {
           },
           isLiked: {
             $first: {
-              $cond: {
-                if: { $eq: ['$storeLikes.userId', new ObjectId(uid)] },
-                then: true,
-                else: false,
-              },
+              $in: [new ObjectId(uid), '$storeLikes.userId'],
             },
           },
           popularCakes: {
