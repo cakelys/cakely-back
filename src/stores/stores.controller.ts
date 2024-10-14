@@ -6,6 +6,8 @@ import {
   Param,
   Post,
   Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { StoresService } from './stores.service';
 import {
@@ -14,19 +16,22 @@ import {
   validateRequiredField,
   validateSortBy,
 } from 'src/utils/validation-utils';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('stores')
 export class StoresController {
   constructor(private readonly storesService: StoresService) {}
 
+  @UseGuards(AuthGuard)
   @Get()
   getAllStores(
     @Query('sortBy') sortBy: string,
     @Query('latitude') latitude: string,
     @Query('longitude') longitude: string,
     @Query('page') page: string,
+    @Req() request,
   ) {
-    const uid = '665f134a0dfff9c6393100d5';
+    const uid = request.userId;
     const defaultSortBy = setDefaultSort(sortBy);
     validateSortBy(defaultSortBy);
     validateRequiredField('page', page);
@@ -52,12 +57,14 @@ export class StoresController {
     return this.storesService.getAllStores(uid, defaultSortBy, page);
   }
 
+  @UseGuards(AuthGuard)
   @Get('nearby')
   getNearbyStores(
     @Query('latitude') latitude: string,
     @Query('longitude') longitude: string,
+    @Req() request,
   ) {
-    const uid = '665f134a0dfff9c6393100d5';
+    const uid = request.userId;
     validateCoordinates(latitude, longitude);
     return this.storesService.getNearbyStores(uid, latitude, longitude);
   }
@@ -72,18 +79,21 @@ export class StoresController {
     return this.storesService.getOldestStores();
   }
 
+  @UseGuards(AuthGuard)
   @Get(':storeId')
-  getStore(@Param('storeId') storeId: string) {
-    const uid = '665f134a0dfff9c6393100d5';
+  getStore(@Param('storeId') storeId: string, @Req() request) {
+    const uid = request.userId;
     return this.storesService.getStoreById(uid, storeId);
   }
 
+  @UseGuards(AuthGuard)
   @Get(':storeId/cakes')
   getStoreCakes(
     @Param('storeId') storeId: string,
     @Query('page') page: string,
+    @Req() request,
   ) {
-    const uid = '665f134a0dfff9c6393100d5';
+    const uid = request.userId;
     validateRequiredField('page', page);
     return this.storesService.getStoreCakes(uid, storeId, page);
   }
@@ -93,14 +103,16 @@ export class StoresController {
     return this.storesService.getStoreAllCakes(storeId);
   }
 
+  @UseGuards(AuthGuard)
   @Get(':storeId/cakes/:cakeId')
   getStoreCake(
     @Param('storeId') storeId: string,
     @Param('cakeId') cakeId: string,
     @Query('latitude') latitude: string,
     @Query('longitude') longitude: string,
+    @Req() request,
   ) {
-    const uid = '665f134a0dfff9c6393100d5';
+    const uid = request.userId;
     if (latitude && longitude) {
       return this.storesService.getStoreCake(
         uid,
@@ -113,13 +125,15 @@ export class StoresController {
     return this.storesService.getStoreCake(uid, storeId, cakeId);
   }
 
+  @UseGuards(AuthGuard)
   @Get(':storeId/details')
   getStoreDetails(
     @Param('storeId') storeId: string,
     @Query('latitude') latitude: string,
     @Query('longitude') longitude: string,
+    @Req() request,
   ) {
-    const uid = '665f134a0dfff9c6393100d5';
+    const uid = request.userId;
 
     if (latitude && longitude) {
       return this.storesService.getStoreDetails(
