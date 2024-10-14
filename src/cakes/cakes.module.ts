@@ -7,6 +7,10 @@ import { CakesRepository } from './cakes.repository';
 import { S3Service } from 'src/s3/s3.service';
 import { Store, StoreSchema } from 'src/stores/entities/store.entity';
 import { CakeLike, CakeLikeSchema } from 'src/likes/entities/cakeLike.entity';
+import {
+  PendingS3Deletion,
+  PendingS3DeletionSchema,
+} from 'src/s3/entities/pendingS3Deletion.entity';
 
 @Module({
   imports: [
@@ -14,6 +18,7 @@ import { CakeLike, CakeLikeSchema } from 'src/likes/entities/cakeLike.entity';
       { name: Cake.name, schema: CakeSchema },
       { name: Store.name, schema: StoreSchema },
       { name: CakeLike.name, schema: CakeLikeSchema },
+      { name: PendingS3Deletion.name, schema: PendingS3DeletionSchema },
     ]),
   ],
   controllers: [CakesController],

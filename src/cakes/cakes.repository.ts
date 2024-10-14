@@ -7,6 +7,7 @@ import { Cake } from './entities/cake.entity';
 import { CreateCakeDto } from './dto/create-cake.dto';
 import calculateDistance from 'src/utils/distance-query-utils';
 import { CakeLike } from 'src/likes/entities/cakeLike.entity';
+import { PendingS3Deletion } from 'src/s3/entities/pendingS3Deletion.entity';
 
 @Injectable()
 export class CakesRepository {
@@ -14,6 +15,8 @@ export class CakesRepository {
     @InjectModel('Cake') private readonly cakeModel: Model<Cake>,
     @InjectModel('Store') private readonly storeModel: Model<Store>,
     @InjectModel('CakeLike') private readonly cakeLikeModel: Model<CakeLike>,
+    @InjectModel('PendingS3Deletion')
+    private readonly pendingS3DeletionModel: Model<PendingS3Deletion>,
   ) {}
 
   async getTodayCakesData(uid: string): Promise<any> {
@@ -574,19 +577,34 @@ export class CakesRepository {
 
     try {
       const cakeObjectIds = cakeIds.map((cakeId) => new ObjectId(cakeId));
-      const deletedCakes = await this.cakeModel.deleteMany(
+
+      const deletedCakes = await this.cakeModel
+        .find({ _id: { $in: cakeObjectIds } })
+        .session(session);
+
+      if (deletedCakes.length !== cakeIds.length) {
+        throw new NotFoundException('해당 케이크를 찾을 수 없습니다.');
+      }
+
+      await this.cakeModel.deleteMany(
         { _id: { $in: cakeObjectIds } },
         { session },
       );
-
-      if (deletedCakes.deletedCount !== cakeIds.length) {
-        throw new NotFoundException('해당 케이크를 찾을 수 없습니다.');
-      }
 
       await this.cakeLikeModel.deleteMany(
         { cakeId: { $in: cakeObjectIds } },
         { session },
       );
+
+      const pendingS3Deletions = deletedCakes.flatMap((cake) => {
+        return cake.photos.map((photo) => ({
+          s3Key: photo,
+        }));
+      });
+
+      await this.pendingS3DeletionModel.insertMany(pendingS3Deletions, {
+        session,
+      });
 
       await session.commitTransaction();
     } catch (error) {
