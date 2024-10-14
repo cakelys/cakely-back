@@ -507,53 +507,36 @@ export class StoresRepository {
       throw new NotFoundException('해당 스토어의 케이크를 찾을 수 없습니다.');
     }
 
-    const recommendedCakes = await this.storeModel.aggregate([
+    const recommendedCakes = await this.cakeModel.aggregate([
       {
         $match: {
-          _id: new ObjectId(storeId),
-        },
-      },
-      {
-        $lookup: {
-          from: 'cakes',
-          localField: '_id',
-          foreignField: 'storeId',
-          as: 'cakes',
-        },
-      },
-      {
-        $unwind: {
-          path: '$cakes',
-          preserveNullAndEmptyArrays: true,
+          storeId: new ObjectId(storeId),
         },
       },
       {
         $lookup: {
           from: 'cakeLikes',
-          localField: 'cakes._id',
+          localField: '_id',
           foreignField: 'cakeId',
-          as: 'result',
-        },
-      },
-      {
-        $unwind: {
-          path: '$result',
-          preserveNullAndEmptyArrays: true,
+          as: 'cakeLikes',
         },
       },
       {
         $project: {
           _id: 0,
-          id: '$cakes._id',
-          photo: { $arrayElemAt: ['$cakes.photos', 0] },
+          id: '$_id',
+          photo: { $arrayElemAt: ['$photos', 0] },
           isLiked: {
-            $cond: {
-              if: {
-                $eq: ['$result.userId', new ObjectId(uid)],
+            $in: [
+              new ObjectId(uid),
+              {
+                $map: {
+                  input: '$cakeLikes',
+                  as: 'like',
+                  in: '$$like.userId',
+                },
               },
-              then: true,
-              else: false,
-            },
+            ],
           },
         },
       },
