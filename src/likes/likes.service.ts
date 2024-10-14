@@ -64,6 +64,12 @@ export class LikesService {
     );
 
     for (const LikedCake of allLikedCakes) {
+      if (LikedCake.photo === null) {
+        allLikedCakes.splice(allLikedCakes.indexOf(LikedCake), 1);
+      }
+    }
+
+    for (const LikedCake of allLikedCakes) {
       LikedCake.photo = await this.s3Service.generagePresignedDownloadUrl(
         process.env.S3_RESIZED_BUCKET_NAME,
         LikedCake.photo,
