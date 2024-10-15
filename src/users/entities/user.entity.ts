@@ -2,7 +2,10 @@ import { SchemaFactory, Schema, Prop } from '@nestjs/mongoose';
 import { ObjectId } from 'mongodb';
 import { Document } from 'mongoose';
 
-@Schema({ collection: 'users' })
+@Schema({
+  collection: 'users',
+  timestamps: { createdAt: 'createdDate', updatedAt: 'modifiedDate' },
+})
 export class User extends Document {
   @Prop({ type: ObjectId })
   id: string;
@@ -12,12 +15,6 @@ export class User extends Document {
 
   @Prop({ type: String, required: true })
   platform: string;
-
-  @Prop({ type: Date, default: Date.now })
-  createdDate: Date;
-
-  @Prop({ type: Date, default: Date.now })
-  modifiedDate: Date;
 
   @Prop({ type: String })
   nickname: string;
