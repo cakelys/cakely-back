@@ -1,9 +1,9 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, VERSION_NEUTRAL } from '@nestjs/common';
 import { AppService } from './app.service';
 import { validateRequiredField } from './utils/validation-utils';
 import { AppAvailability } from './utils/app-availability.enum';
 
-@Controller()
+@Controller({ version: ['1', VERSION_NEUTRAL] })
 export class AppController {
   constructor(private readonly appService: AppService) {}
 

@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Req,
+  VERSION_NEUTRAL,
 } from '@nestjs/common';
 import { CakesService } from './cakes.service';
 import {
@@ -19,7 +20,7 @@ import {
 import { CreateCakeDto } from './dto/create-cake.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 
-@Controller('cakes')
+@Controller({ path: 'cakes', version: ['1', VERSION_NEUTRAL] })
 export class CakesController {
   constructor(private readonly cakesService: CakesService) {}
 

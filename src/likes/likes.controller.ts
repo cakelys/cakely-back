@@ -7,6 +7,7 @@ import {
   Query,
   UseGuards,
   Req,
+  VERSION_NEUTRAL,
 } from '@nestjs/common';
 import { LikesService } from './likes.service';
 import {
@@ -18,7 +19,7 @@ import {
 import { AuthGuard } from 'src/auth/auth.guard';
 
 @UseGuards(AuthGuard)
-@Controller('likes')
+@Controller({ path: 'likes', version: ['1', VERSION_NEUTRAL] })
 export class LikesController {
   constructor(private readonly likesService: LikesService) {}
 

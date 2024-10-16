@@ -8,6 +8,7 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors,
+  VERSION_NEUTRAL,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -15,7 +16,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { S3Service } from 'src/s3/s3.service';
 
-@Controller('users')
+@Controller({ path: 'users', version: ['1', VERSION_NEUTRAL] })
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,

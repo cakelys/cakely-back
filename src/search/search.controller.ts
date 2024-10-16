@@ -1,8 +1,15 @@
-import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  Req,
+  UseGuards,
+  VERSION_NEUTRAL,
+} from '@nestjs/common';
 import { SearchService } from './search.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 
-@Controller('search')
+@Controller({ path: 'search', version: ['1', VERSION_NEUTRAL] })
 export class SearchController {
   constructor(private readonly searchService: SearchService) {}
 

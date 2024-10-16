@@ -3,7 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as admin from 'firebase-admin';
 import { initializeApp } from 'firebase-admin/app';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 
 let cachedServer;
 
@@ -20,6 +20,11 @@ export const handler = async (event, context) => {
         transform: true,
       }),
     );
+
+    nestApp.enableVersioning({
+      defaultVersion: '1',
+      type: VersioningType.URI,
+    });
 
     initializeApp({
       credential: admin.credential.cert({

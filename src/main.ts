@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { initializeApp } from 'firebase-admin/app';
 import * as admin from 'firebase-admin';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,6 +15,11 @@ async function bootstrap() {
     }),
   );
 
+  app.enableVersioning({
+    defaultVersion: '1',
+    type: VersioningType.URI,
+  });
+
   initializeApp({
     credential: admin.credential.cert({
       projectId: process.env.FIREBASE_PROJECT_ID,
@@ -22,8 +27,6 @@ async function bootstrap() {
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
     }),
   });
-
-  // app.use(cookieParser());
 
   await app.listen(3000);
 }

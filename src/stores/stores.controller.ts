@@ -8,6 +8,7 @@ import {
   Query,
   Req,
   UseGuards,
+  VERSION_NEUTRAL,
 } from '@nestjs/common';
 import { StoresService } from './stores.service';
 import {
@@ -18,7 +19,7 @@ import {
 } from 'src/utils/validation-utils';
 import { AuthGuard } from 'src/auth/auth.guard';
 
-@Controller('stores')
+@Controller({ path: 'stores', version: ['1', VERSION_NEUTRAL] })
 export class StoresController {
   constructor(private readonly storesService: StoresService) {}
 
