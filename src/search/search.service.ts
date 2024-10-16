@@ -24,7 +24,7 @@ export class SearchService {
     }
 
     const searchURL = process.env.SEARCH_URL;
-    const url = `${searchURL}?keyword=${keyword}&page=${pageInt}&size=${size}`;
+    const url = `${searchURL}?keyword=${keyword}&page=${pageInt}&size=${size}&uid=${uid}`;
 
     try {
       const searchResponse = await lastValueFrom(this.httpService.get(url));
