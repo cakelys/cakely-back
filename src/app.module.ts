@@ -13,6 +13,9 @@ import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      envFilePath: [`.env.${process.env.NODE_ENV}`],
+    }),
     CakesModule,
     StoresModule,
     LikesModule,

@@ -17,7 +17,7 @@ package:
     - node_modules/aws-sdk/**
 
 custom:
-  envFile: .env
+  envFile: .env.${opt:stage, 'dev'}
 
 functions:
   main:
