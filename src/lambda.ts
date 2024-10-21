@@ -9,6 +9,7 @@ let cachedServer;
 
 export const handler = async (event, context) => {
   if (!cachedServer) {
+    // dev version log
     console.log(event);
     const nestApp = await NestFactory.create(AppModule);
     nestApp.enableCors();
