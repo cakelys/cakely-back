@@ -30,6 +30,7 @@ jobs:
           echo "FIREBASE_CLIENT_EMAIL=${{ secrets.FIREBASE_CLIENT_EMAIL }}" >> .env
           echo "SEARCH_URL=${{ secrets.SEARCH_URL }}" >> .env
           echo "S3_RESIZED_BUCKET_NAME=${{ secrets.S3_RESIZED_BUCKET_NAME }}" >> .env
+          echo "LOG_LEVEL=${{ secrets.LOG_LEVEL_DEV }}" >> .env
       - name: Display .env file
         run: cat .env
       - name: serverless deploy

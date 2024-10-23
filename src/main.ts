@@ -2,11 +2,17 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { initializeApp } from 'firebase-admin/app';
 import * as admin from 'firebase-admin';
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { LogLevel, ValidationPipe, VersioningType } from '@nestjs/common';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const logLevels: LogLevel[] = process.env.LOG_LEVEL.split(',') as LogLevel[];
+
+  const app = await NestFactory.create(AppModule, {
+    logger: logLevels,
+  });
+
   app.enableCors();
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
