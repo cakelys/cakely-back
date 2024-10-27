@@ -134,6 +134,7 @@ export class CakesRepository {
       {
         $sort: {
           [sortCriteria]: sortCriteria === 'distance' ? 1 : -1,
+          createdDate: -1,
         },
       },
       {
