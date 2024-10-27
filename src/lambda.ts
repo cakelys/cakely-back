@@ -3,7 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as admin from 'firebase-admin';
 import { initializeApp } from 'firebase-admin/app';
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { LogLevel, ValidationPipe, VersioningType } from '@nestjs/common';
 
 let cachedServer;
 
@@ -11,7 +11,15 @@ export const handler = async (event, context) => {
   if (!cachedServer) {
     // dev version log
     console.log(event);
-    const nestApp = await NestFactory.create(AppModule);
+
+    const logLevels: LogLevel[] = process.env.LOG_LEVEL.split(
+      ',',
+    ) as LogLevel[];
+
+    const nestApp = await NestFactory.create(AppModule, {
+      logger: logLevels,
+    });
+
     nestApp.enableCors();
 
     nestApp.useGlobalPipes(

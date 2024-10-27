@@ -746,6 +746,7 @@ export class StoresRepository {
           name: 1,
           address: 1,
           logo: 1,
+          isChecked: 1,
         },
       },
     ]);

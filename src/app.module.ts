@@ -19,9 +19,6 @@ import { SearchModule } from './search/search.module';
     CakesModule,
     StoresModule,
     LikesModule,
-    ConfigModule.forRoot({
-      envFilePath: [`.env`],
-    }),
     MongooseModule.forRoot(process.env.MONGODB_URI, {
       dbName: process.env.MONGODB_DBNAME,
     }),

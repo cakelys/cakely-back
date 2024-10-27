@@ -254,31 +254,9 @@ export class LikesRepository {
         },
       },
       {
-        $addFields: {
-          sortField: {
-            $switch: {
-              branches: [
-                {
-                  case: { $eq: [sortCriteria, 'createdDate'] },
-                  then: '$createdDate',
-                },
-                {
-                  case: { $eq: [sortCriteria, 'popularity'] },
-                  then: '$cake.popularity',
-                },
-                {
-                  case: { $eq: [sortCriteria, 'distance'] },
-                  then: '$distance',
-                },
-              ],
-              default: '$cake.popularity',
-            },
-          },
-        },
-      },
-      {
         $sort: {
-          sortField: sortCriteria === 'distance' ? 1 : -1,
+          [sortCriteria]: sortCriteria === 'distance' ? 1 : -1,
+          createdDate: -1,
         },
       },
       {
