@@ -116,8 +116,9 @@ export class LikesRepository {
     userLongitude: number,
     page: number,
   ): Promise<any> {
-    const pageSize = 10;
-    const skip = (page - 1) * pageSize;
+    const pageSize = page !== undefined ? 10 : Number.MAX_SAFE_INTEGER;
+    const skip = page !== undefined ? (page - 1) * pageSize : 0;
+    console.log(pageSize, skip);
 
     const allLikedStores = await this.storeLikeModel.aggregate([
       {
