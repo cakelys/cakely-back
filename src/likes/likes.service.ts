@@ -53,7 +53,7 @@ export class LikesService {
     const sortCriteria = setSortCriteria(sortBy);
     const userLatitudeNumber = parseFloat(userLatitude);
     const userLongitudeNumber = parseFloat(userLongitude);
-    const pageInt = parseInt(page, 10);
+    const pageInt = page !== undefined ? parseInt(page, 10) : undefined;
 
     const allLikedCakes = await this.likesRepository.getAllLikedCakes(
       uid,

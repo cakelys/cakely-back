@@ -151,4 +151,37 @@ export class LikesController {
 
     return this.likesService.getAllStoreLikes(uid, defaultSortBy, undefined);
   }
+
+  @Get('cakes/all-liked')
+  getAllLikedCakesWithoutPage(
+    @Query('sortBy') sortBy: string,
+    @Query('latitude') latitude: string,
+    @Query('longitude') longitude: string,
+    @Req() request,
+  ) {
+    const uid = request.userId;
+    const defaultSortBy = setDefaultSort(sortBy);
+    validateSortBy(defaultSortBy);
+
+    if (defaultSortBy === 'distance') {
+      validateCoordinates(latitude, longitude);
+      return this.likesService.getAllLikedCakes(
+        uid,
+        defaultSortBy,
+        undefined,
+        latitude,
+        longitude,
+      );
+    } else if (latitude && longitude) {
+      return this.likesService.getAllLikedCakes(
+        uid,
+        defaultSortBy,
+        undefined,
+        latitude,
+        longitude,
+      );
+    }
+
+    return this.likesService.getAllLikedCakes(uid, defaultSortBy, undefined);
+  }
 }

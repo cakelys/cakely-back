@@ -20,35 +20,6 @@ export class CakesRepository {
   ) {}
 
   async getTodayCakesData(uid: string): Promise<any> {
-    const test = await this.cakeModel.aggregate([
-      {
-        $lookup: {
-          from: 'cakeLikes',
-          localField: '_id',
-          foreignField: 'cakeId',
-          as: 'cakeLikes',
-        },
-      },
-      {
-        $lookup: {
-          from: 'stores',
-          localField: 'storeId',
-          foreignField: '_id',
-          as: 'store',
-        },
-      },
-      {
-        $addFields: {
-          store: { $arrayElemAt: ['$store', 0] },
-        },
-      },
-      {
-        $limit: 10,
-      },
-    ]);
-
-    console.log(test);
-
     const todays = await this.cakeModel.aggregate([
       {
         $lookup: {
