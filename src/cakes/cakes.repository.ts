@@ -325,7 +325,7 @@ export class CakesRepository {
           'store.isLiked': {
             $cond: {
               if: {
-                $eq: ['$result.userId', new ObjectId(uid)],
+                $eq: ['$storeLikes.userId', new ObjectId(uid)],
               },
               then: true,
               else: false,
