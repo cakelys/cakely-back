@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 import { CreateCakeLikeDto } from './dto/create-cake-like.dto';
 import { CreateStoreLikeDto } from './dto/create-store-like.dto';
 import calculateDistance from 'src/utils/distance-query-utils';
+import { DEFAULT_PAGE_SIZE } from 'src/utils/constants';
 
 @Injectable()
 export class LikesRepository {
@@ -116,7 +117,8 @@ export class LikesRepository {
     userLongitude: number,
     page: number,
   ): Promise<any> {
-    const pageSize = page !== undefined ? 10 : Number.MAX_SAFE_INTEGER;
+    const pageSize =
+      page !== undefined ? DEFAULT_PAGE_SIZE : Number.MAX_SAFE_INTEGER;
     const skip = page !== undefined ? (page - 1) * pageSize : 0;
 
     const allLikedStores = await this.storeLikeModel.aggregate([
@@ -206,7 +208,8 @@ export class LikesRepository {
     userLongitude: number,
     page: number,
   ): Promise<any> {
-    const pageSize = page !== undefined ? 10 : Number.MAX_SAFE_INTEGER;
+    const pageSize =
+      page !== undefined ? DEFAULT_PAGE_SIZE : Number.MAX_SAFE_INTEGER;
     const skip = page !== undefined ? (page - 1) * pageSize : 0;
 
     const allLikedCakes = await this.cakeLikeModel.aggregate([

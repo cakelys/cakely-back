@@ -6,6 +6,7 @@ import { lastValueFrom } from 'rxjs';
 import { S3Service } from 'src/s3/s3.service';
 import { SearchLog } from './entities/searchLog.entity';
 import { ObjectId } from 'mongodb';
+import { DEFAULT_PAGE_SIZE } from 'src/utils/constants';
 
 @Injectable()
 export class SearchService {
@@ -17,7 +18,7 @@ export class SearchService {
 
   async searchCakes(uid: string, keyword: string, page: string) {
     const pageInt = parseInt(page, 10);
-    const size = 10;
+    const size = DEFAULT_PAGE_SIZE;
 
     if (pageInt === 1) {
       await this.createSearchLog(keyword, uid);

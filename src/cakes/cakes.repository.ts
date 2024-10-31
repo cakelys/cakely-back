@@ -8,6 +8,7 @@ import { CreateCakeDto } from './dto/create-cake.dto';
 import calculateDistance from 'src/utils/distance-query-utils';
 import { CakeLike } from 'src/likes/entities/cakeLike.entity';
 import { PendingS3Deletion } from 'src/s3/entities/pendingS3Deletion.entity';
+import { DEFAULT_PAGE_SIZE } from 'src/utils/constants';
 
 @Injectable()
 export class CakesRepository {
@@ -85,7 +86,7 @@ export class CakesRepository {
     userLongitude: number,
     page: number,
   ): Promise<any> {
-    const pageSize = 10;
+    const pageSize = DEFAULT_PAGE_SIZE;
     const skip = (page - 1) * pageSize;
 
     const categoryCakes = await this.cakeModel.aggregate([
@@ -171,7 +172,7 @@ export class CakesRepository {
     userLongitude: number,
     page: number,
   ): Promise<any> {
-    const pageSize = 10;
+    const pageSize = DEFAULT_PAGE_SIZE;
     const skip = (page - 1) * pageSize;
 
     const recommendCakes = await this.cakeModel.aggregate([
