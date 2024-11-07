@@ -13,6 +13,7 @@ import { Store } from './entities/store.entity';
 import { Cake } from 'src/cakes/entities/cake.entity';
 import { StoreLike } from 'src/likes/entities/storeLike.entity';
 import { CakeLike } from 'src/likes/entities/cakeLike.entity';
+import { DEFAULT_PAGE_SIZE } from 'src/utils/constants';
 
 @Injectable()
 export class StoresRepository {
@@ -32,7 +33,7 @@ export class StoresRepository {
     userLongitude: number,
     page: number,
   ): Promise<any[]> {
-    const pageSize = 10;
+    const pageSize = DEFAULT_PAGE_SIZE;
     const skip = (page - 1) * pageSize;
 
     const stores = await this.storeModel.aggregate([
@@ -255,7 +256,7 @@ export class StoresRepository {
     storeId: string,
     page: number,
   ): Promise<any> {
-    const pageSize = 10;
+    const pageSize = DEFAULT_PAGE_SIZE;
     const skip = (page - 1) * pageSize;
 
     const storeCakes = await this.storeModel.aggregate([
@@ -487,7 +488,7 @@ export class StoresRepository {
           'store.isLiked': {
             $cond: {
               if: {
-                $eq: ['$result.userId', new ObjectId(uid)],
+                $eq: ['$storeLikes.userId', new ObjectId(uid)],
               },
               then: true,
               else: false,
@@ -499,6 +500,7 @@ export class StoresRepository {
           'store.address': 1,
           'store.distance': '$distance',
           'store.siteUrl': { $arrayElemAt: ['$store.siteUrl', 0] },
+          'store.instarId': 1,
         },
       },
     ]);

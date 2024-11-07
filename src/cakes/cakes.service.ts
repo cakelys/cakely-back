@@ -94,6 +94,7 @@ export class CakesService {
     userLatitude?: string,
     userLongitude?: string,
   ) {
+    const instargramUrl = 'https://www.instagram.com/';
     const userLatitudeNumber = parseFloat(userLatitude);
     const userLongitudeNumber = parseFloat(userLongitude);
     const cakeData = await this.cakesRepository.getCakeByIdData(
@@ -102,6 +103,13 @@ export class CakesService {
       userLatitudeNumber,
       userLongitudeNumber,
     );
+
+    cakeData.store.siteUrl =
+      cakeData.store.siteUrl === undefined
+        ? instargramUrl + cakeData.store.instarId
+        : cakeData.store.siteUrl;
+
+    delete cakeData.store.instarId;
 
     cakeData.store.logo = await this.s3Service.generagePresignedDownloadUrl(
       process.env.S3_RESIZED_BUCKET_NAME,
