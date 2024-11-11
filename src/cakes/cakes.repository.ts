@@ -23,6 +23,9 @@ export class CakesRepository {
   async getTodayCakesData(uid: string): Promise<any> {
     const todays = await this.cakeModel.aggregate([
       {
+        $sample: { size: 5 },
+      },
+      {
         $lookup: {
           from: 'cakeLikes',
           localField: '_id',
@@ -69,9 +72,6 @@ export class CakesRepository {
       },
       {
         $sort: { 'cake.createdDate': -1 },
-      },
-      {
-        $limit: 5,
       },
     ]);
 
