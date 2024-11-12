@@ -21,10 +21,12 @@ export class CakesRepository {
   ) {}
 
   async getTodayCakesData(uid: string): Promise<any> {
+    const adminUserIds = [
+      new ObjectId(process.env.ADMIN_USER_ID),
+      new ObjectId(process.env.ADMIN_USER_ID_2),
+    ];
+
     const todays = await this.cakeModel.aggregate([
-      {
-        $sample: { size: 5 },
-      },
       {
         $lookup: {
           from: 'cakeLikes',
@@ -32,6 +34,14 @@ export class CakesRepository {
           foreignField: 'cakeId',
           as: 'cakeLikes',
         },
+      },
+      {
+        $match: {
+          'cakeLikes.userId': { $in: adminUserIds },
+        },
+      },
+      {
+        $sample: { size: 5 },
       },
       {
         $lookup: {
