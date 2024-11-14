@@ -299,10 +299,19 @@ export class LikesRepository {
     const newLike = new this.cakeLikeModel(createCakeLikeDto);
     await newLike.save();
 
+    await this.cakeModel.findByIdAndUpdate(cake._id, {
+      $inc: { popularity: 1 },
+    });
+
     return new CreateCakeLikeDto(newLike.userId, newLike.cakeId, newLike._id);
   }
 
   async createStoreLike(createStoreLikeDto: CreateStoreLikeDto) {
+    const store = await this.storeModel.findById(createStoreLikeDto.storeId);
+    if (!store) {
+      throw new NotFoundException('Invalid store id');
+    }
+
     const isExist = await this.storeLikeModel.findOne({
       userId: createStoreLikeDto.userId,
       storeId: createStoreLikeDto.storeId,
@@ -314,6 +323,10 @@ export class LikesRepository {
 
     const newLike = new this.storeLikeModel(createStoreLikeDto);
     await newLike.save();
+
+    await this.storeModel.findByIdAndUpdate(store._id, {
+      $inc: { popularity: 1 },
+    });
 
     return new CreateStoreLikeDto(newLike.userId, newLike.storeId, newLike._id);
   }
@@ -332,6 +345,10 @@ export class LikesRepository {
     if (deletedCakeLike.deletedCount === 0) {
       throw new NotFoundException('Like not found');
     }
+
+    await this.cakeModel.findByIdAndUpdate(cake._id, {
+      $inc: { popularity: -1 },
+    });
   }
 
   async deleteStoreLike(uid: string, storeId: string) {
@@ -348,5 +365,9 @@ export class LikesRepository {
     if (deletedStoreLike.deletedCount === 0) {
       throw new NotFoundException('Like not found');
     }
+
+    await this.storeModel.findByIdAndUpdate(store._id, {
+      $inc: { popularity: -1 },
+    });
   }
 }
