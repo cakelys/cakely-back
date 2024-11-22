@@ -41,7 +41,10 @@ export class CakesRepository {
         },
       },
       {
-        $sample: { size: 5 },
+        $sort: { random: 1 },
+      },
+      {
+        $limit: 5,
       },
       {
         $lookup: {
