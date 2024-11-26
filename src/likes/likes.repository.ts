@@ -300,7 +300,7 @@ export class LikesRepository {
     await newLike.save();
 
     await this.cakeModel.findByIdAndUpdate(cake._id, {
-      $inc: { popularity: 1 },
+      $inc: { popularity: 10 },
     });
 
     return new CreateCakeLikeDto(newLike.userId, newLike.cakeId, newLike._id);
@@ -325,7 +325,7 @@ export class LikesRepository {
     await newLike.save();
 
     await this.storeModel.findByIdAndUpdate(store._id, {
-      $inc: { popularity: 1 },
+      $inc: { popularity: 10 },
     });
 
     return new CreateStoreLikeDto(newLike.userId, newLike.storeId, newLike._id);
@@ -347,7 +347,7 @@ export class LikesRepository {
     }
 
     await this.cakeModel.findByIdAndUpdate(cake._id, {
-      $inc: { popularity: -1 },
+      $inc: { popularity: -10 },
     });
   }
 
@@ -367,7 +367,7 @@ export class LikesRepository {
     }
 
     await this.storeModel.findByIdAndUpdate(store._id, {
-      $inc: { popularity: -1 },
+      $inc: { popularity: -10 },
     });
   }
 }
