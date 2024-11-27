@@ -190,16 +190,19 @@ export class CakesRepository {
 
     const recommendCakes = await this.cakeModel.aggregate([
       {
+        $sort: {
+          popularity: 1,
+        },
+      },
+      {
+        $limit: 100,
+      },
+      {
         $lookup: {
           from: 'cakeLikes',
           localField: '_id',
           foreignField: 'cakeId',
           as: 'cakeLikes',
-        },
-      },
-      {
-        $sample: {
-          size: 100,
         },
       },
       {
