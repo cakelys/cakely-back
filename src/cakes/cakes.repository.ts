@@ -459,12 +459,7 @@ export class CakesRepository {
             },
           },
           {
-            $sort: {
-              createdDate: -1,
-            },
-          },
-          {
-            $limit: 1,
+            $sample: { size: 1 },
           },
           {
             $project: {
