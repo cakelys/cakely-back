@@ -154,6 +154,34 @@ export class CakesService {
     const categoryListFileData = await this.s3Service.getFile(key);
     const categoryListFileContent = categoryListFileData.toString('utf-8');
     const categoryListJsonData = JSON.parse(categoryListFileContent);
+    let anniversaryCategoryName = '생일';
+
+    const anniversaryKey = 'app-data/anniversary-category-list.json';
+    const anniversaryCategoryListFileData = await this.s3Service.getFile(
+      anniversaryKey,
+    );
+    const anniversaryCategoryListFileContent =
+      anniversaryCategoryListFileData.toString('utf-8');
+    const anniversaryCategoryListJsonData = JSON.parse(
+      anniversaryCategoryListFileContent,
+    );
+
+    const today = new Date();
+    const currentMonthDay = `${String(today.getMonth() + 1).padStart(
+      2,
+      '0',
+    )}-${String(today.getDate()).padStart(2, '0')}`;
+
+    for (const anniversaryCategory of anniversaryCategoryListJsonData) {
+      if (
+        anniversaryCategory.start_date <= currentMonthDay &&
+        anniversaryCategory.end_date >= currentMonthDay
+      ) {
+        anniversaryCategoryName = anniversaryCategory.name;
+      }
+    }
+
+    categoryListJsonData[0].name = anniversaryCategoryName;
 
     const categories = await this.cakesRepository.getCategories(
       categoryListJsonData,
