@@ -20,8 +20,6 @@ export const handler = async (event, context) => {
       logger: logLevels,
     });
 
-    nestApp.enableCors();
-
     nestApp.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
