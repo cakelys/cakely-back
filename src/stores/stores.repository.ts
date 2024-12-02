@@ -324,10 +324,6 @@ export class StoresRepository {
       { $limit: pageSize },
     ]);
 
-    if (storeCakes.length <= 0) {
-      throw new NotFoundException('해당 스토어의 케이크를 찾을 수 없습니다.');
-    }
-
     return storeCakes;
   }
 
