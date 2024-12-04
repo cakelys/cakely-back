@@ -3,6 +3,7 @@ import { CakesRepository } from './cakes.repository';
 import { setSortCriteria } from 'src/utils/validation-utils';
 import { S3Service } from 'src/s3/s3.service';
 import { CreateCakeDto } from './dto/create-cake.dto';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class CakesService {
@@ -41,7 +42,21 @@ export class CakesService {
   }
 
   async getTodayCakes(uid: string) {
-    const todayCakes = await this.cakesRepository.getTodayCakesData(uid);
+    const today = new Date();
+    const date: string =
+      today.getFullYear() +
+      '-' +
+      String(today.getMonth() + 1).padStart(2, '0') +
+      '-' +
+      String(today.getDate()).padStart(2, '0');
+
+    const seed = crypto.createHash('sha256').update(date).digest('hex');
+    const seedModValue = String(parseInt(seed.slice(0, 8), 16) % 1000);
+
+    const todayCakes = await this.cakesRepository.getTodayCakesData(
+      uid,
+      seedModValue,
+    );
 
     for (const todayData of todayCakes) {
       todayData.store.logo = await this.s3Service.generagePresignedDownloadUrl(

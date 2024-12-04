@@ -20,7 +20,7 @@ export class CakesRepository {
     private readonly pendingS3DeletionModel: Model<PendingS3Deletion>,
   ) {}
 
-  async getTodayCakesData(uid: string): Promise<any> {
+  async getTodayCakesData(uid: string, dateSeed: string): Promise<any> {
     const adminUserIds = [
       new ObjectId(process.env.ADMIN_USER_ID),
       new ObjectId(process.env.ADMIN_USER_ID_2),
@@ -41,10 +41,17 @@ export class CakesRepository {
         },
       },
       {
-        $limit: 100,
+        $addFields: {
+          randomField: {
+            $mod: [{ $toLong: { $toDate: '$_id' } }, parseInt(dateSeed)],
+          },
+        },
       },
       {
-        $sample: { size: 5 },
+        $sort: { randomField: 1 },
+      },
+      {
+        $limit: 5,
       },
       {
         $lookup: {
