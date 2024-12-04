@@ -4,12 +4,14 @@ import { setSortCriteria } from 'src/utils/validation-utils';
 import { S3Service } from 'src/s3/s3.service';
 import { CreateCakeDto } from './dto/create-cake.dto';
 import * as crypto from 'crypto';
+import { StoresRepository } from 'src/stores/stores.repository';
 
 @Injectable()
 export class CakesService {
   constructor(
     private readonly cakesRepository: CakesRepository,
     private readonly s3Service: S3Service,
+    private readonly storesRepository: StoresRepository,
   ) {}
 
   async getRecommendCakes(
@@ -24,7 +26,7 @@ export class CakesService {
     const userLongitudeNumber = parseFloat(userLongitude);
     const pageInt = parseInt(page, 10);
 
-    const recommendedCakes = await this.cakesRepository.getRecommendCakes(
+    const recommendedCakes = await this.storesRepository.getRecommendCakes(
       uid,
       sortCriteria,
       userLatitudeNumber,
