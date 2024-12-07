@@ -378,7 +378,11 @@ export class CakesRepository {
       },
     ]);
 
-    return cakes;
+    const orderedCakes = cakeIds
+      .map((cakeId) => cakes.find((cake) => cake.id.toString() === cakeId))
+      .filter((cake) => cake !== undefined);
+
+    return orderedCakes;
   }
 
   async getCategories(categoryListJsonData: any): Promise<any> {
