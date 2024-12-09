@@ -15,7 +15,7 @@ export class AppController {
     validateRequiredField('os', os);
     validateRequiredField('version', version);
 
-    const serverStatus = AppAvailability.Maintenance;
+    const serverStatus = AppAvailability.Normal;
 
     const status = this.appService.getAppStatus(os, version, serverStatus);
 
