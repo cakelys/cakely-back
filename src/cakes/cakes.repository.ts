@@ -20,7 +20,12 @@ export class CakesRepository {
     private readonly pendingS3DeletionModel: Model<PendingS3Deletion>,
   ) {}
 
-  async getTodayCakesData(uid: string): Promise<any> {
+  async getTodayCakesData(uid: string, dateSeed: string): Promise<any> {
+    const adminUserIds = [
+      new ObjectId(process.env.ADMIN_USER_ID),
+      new ObjectId(process.env.ADMIN_USER_ID_2),
+    ];
+
     const todays = await this.cakeModel.aggregate([
       {
         $lookup: {
@@ -29,6 +34,24 @@ export class CakesRepository {
           foreignField: 'cakeId',
           as: 'cakeLikes',
         },
+      },
+      {
+        $match: {
+          'cakeLikes.userId': { $in: adminUserIds },
+        },
+      },
+      {
+        $addFields: {
+          randomField: {
+            $mod: [{ $toLong: { $toDate: '$_id' } }, parseInt(dateSeed)],
+          },
+        },
+      },
+      {
+        $sort: { randomField: 1 },
+      },
+      {
+        $limit: 5,
       },
       {
         $lookup: {
@@ -69,9 +92,6 @@ export class CakesRepository {
       },
       {
         $sort: { 'cake.createdDate': -1 },
-      },
-      {
-        $limit: 5,
       },
     ]);
 
@@ -163,78 +183,6 @@ export class CakesRepository {
     ]);
 
     return { category, categoryCakes: categoryCakes };
-  }
-
-  async getRecommendCakes(
-    uid: string,
-    sortCriteria: string,
-    userLatitude: number,
-    userLongitude: number,
-    page: number,
-  ): Promise<any> {
-    const pageSize = DEFAULT_PAGE_SIZE;
-    const skip = (page - 1) * pageSize;
-
-    const recommendCakes = await this.cakeModel.aggregate([
-      {
-        $lookup: {
-          from: 'cakeLikes',
-          localField: '_id',
-          foreignField: 'cakeId',
-          as: 'cakeLikes',
-        },
-      },
-      {
-        $sample: {
-          size: 100,
-        },
-      },
-      {
-        $lookup: {
-          from: 'stores',
-          localField: 'storeId',
-          foreignField: '_id',
-          as: 'store',
-        },
-      },
-      {
-        $addFields: {
-          store: { $arrayElemAt: ['$store', 0] },
-        },
-      },
-      {
-        $addFields: {
-          distance: calculateDistance(
-            userLatitude,
-            userLongitude,
-            '$store.latitude',
-            '$store.longitude',
-          ),
-        },
-      },
-      {
-        $sort: {
-          [sortCriteria]: sortCriteria === 'distance' ? 1 : -1,
-          'store.createdDate': -1,
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          id: '$_id',
-          photo: { $arrayElemAt: ['$photos', 0] },
-          isLiked: { $in: [new ObjectId(uid), '$cakeLikes.userId'] },
-        },
-      },
-      {
-        $skip: skip,
-      },
-      {
-        $limit: pageSize,
-      },
-    ]);
-
-    return recommendCakes;
   }
 
   async getCakeByIdData(
@@ -430,7 +378,11 @@ export class CakesRepository {
       },
     ]);
 
-    return cakes;
+    const orderedCakes = cakeIds
+      .map((cakeId) => cakes.find((cake) => cake.id.toString() === cakeId))
+      .filter((cake) => cake !== undefined);
+
+    return orderedCakes;
   }
 
   async getCategories(categoryListJsonData: any): Promise<any> {
@@ -443,12 +395,7 @@ export class CakesRepository {
             },
           },
           {
-            $sort: {
-              createdDate: -1,
-            },
-          },
-          {
-            $limit: 1,
+            $sample: { size: 1 },
           },
           {
             $project: {

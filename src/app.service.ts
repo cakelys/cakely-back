@@ -9,10 +9,10 @@ export class AppService {
     serverStatus: AppAvailability,
   ): { availability: number } {
     const validOsList = ['ios', 'android'];
-    const validVersions = ['1.0.0'];
 
     const isOsValid = validOsList.includes(os);
-    const isVersionValid = validVersions.includes(version);
+    const versionPattern = /^(1|[2-9]\d*)\.(\d+)\.(\d+)$/;
+    const isVersionValid = versionPattern.test(version);
     const isValid = isOsValid && isVersionValid;
 
     if (serverStatus === AppAvailability.Maintenance) {

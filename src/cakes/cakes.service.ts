@@ -3,12 +3,15 @@ import { CakesRepository } from './cakes.repository';
 import { setSortCriteria } from 'src/utils/validation-utils';
 import { S3Service } from 'src/s3/s3.service';
 import { CreateCakeDto } from './dto/create-cake.dto';
+import * as crypto from 'crypto';
+import { StoresRepository } from 'src/stores/stores.repository';
 
 @Injectable()
 export class CakesService {
   constructor(
     private readonly cakesRepository: CakesRepository,
     private readonly s3Service: S3Service,
+    private readonly storesRepository: StoresRepository,
   ) {}
 
   async getRecommendCakes(
@@ -23,7 +26,7 @@ export class CakesService {
     const userLongitudeNumber = parseFloat(userLongitude);
     const pageInt = parseInt(page, 10);
 
-    const recommendedCakes = await this.cakesRepository.getRecommendCakes(
+    const recommendedCakes = await this.storesRepository.getRecommendCakes(
       uid,
       sortCriteria,
       userLatitudeNumber,
@@ -41,7 +44,21 @@ export class CakesService {
   }
 
   async getTodayCakes(uid: string) {
-    const todayCakes = await this.cakesRepository.getTodayCakesData(uid);
+    const today = new Date();
+    const date: string =
+      today.getFullYear() +
+      '-' +
+      String(today.getMonth() + 1).padStart(2, '0') +
+      '-' +
+      String(today.getDate()).padStart(2, '0');
+
+    const seed = crypto.createHash('sha256').update(date).digest('hex');
+    const seedModValue = String(parseInt(seed.slice(0, 8), 16) % 1000);
+
+    const todayCakes = await this.cakesRepository.getTodayCakesData(
+      uid,
+      seedModValue,
+    );
 
     for (const todayData of todayCakes) {
       todayData.store.logo = await this.s3Service.generagePresignedDownloadUrl(
@@ -154,6 +171,34 @@ export class CakesService {
     const categoryListFileData = await this.s3Service.getFile(key);
     const categoryListFileContent = categoryListFileData.toString('utf-8');
     const categoryListJsonData = JSON.parse(categoryListFileContent);
+    let anniversaryCategoryName = '생일';
+
+    const anniversaryKey = 'app-data/anniversary-category-list.json';
+    const anniversaryCategoryListFileData = await this.s3Service.getFile(
+      anniversaryKey,
+    );
+    const anniversaryCategoryListFileContent =
+      anniversaryCategoryListFileData.toString('utf-8');
+    const anniversaryCategoryListJsonData = JSON.parse(
+      anniversaryCategoryListFileContent,
+    );
+
+    const today = new Date();
+    const currentMonthDay = `${String(today.getMonth() + 1).padStart(
+      2,
+      '0',
+    )}-${String(today.getDate()).padStart(2, '0')}`;
+
+    for (const anniversaryCategory of anniversaryCategoryListJsonData) {
+      if (
+        anniversaryCategory.start_date <= currentMonthDay &&
+        anniversaryCategory.end_date >= currentMonthDay
+      ) {
+        anniversaryCategoryName = anniversaryCategory.name;
+      }
+    }
+
+    categoryListJsonData[0].name = anniversaryCategoryName;
 
     const categories = await this.cakesRepository.getCategories(
       categoryListJsonData,

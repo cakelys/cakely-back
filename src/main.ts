@@ -11,8 +11,6 @@ async function bootstrap() {
     logger: logLevels,
   });
 
-  app.enableCors();
-
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

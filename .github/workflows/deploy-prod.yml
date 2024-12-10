@@ -31,6 +31,8 @@ jobs:
           echo "SEARCH_URL=${{ secrets.SEARCH_URL }}" >> .env
           echo "S3_RESIZED_BUCKET_NAME=${{ secrets.S3_RESIZED_BUCKET_NAME }}" >> .env
           echo "LOG_LEVEL=${{ secrets.LOG_LEVEL_PROD }}" >> .env
+          echo "ADMIN_USER_ID=${{ secrets.ADMIN_USER_ID }}" >> .env
+          echo "ADMIN_USER_ID_2=${{ secrets.ADMIN_USER_ID_2 }}" >> .env
       - name: Display .env file
         run: cat .env
       - name: serverless deploy

@@ -324,10 +324,6 @@ export class StoresRepository {
       { $limit: pageSize },
     ]);
 
-    if (storeCakes.length <= 0) {
-      throw new NotFoundException('해당 스토어의 케이크를 찾을 수 없습니다.');
-    }
-
     return storeCakes;
   }
 
@@ -844,5 +840,82 @@ export class StoresRepository {
     } finally {
       session.endSession();
     }
+  }
+
+  async getRecommendCakes(
+    uid: string,
+    sortCriteria: string,
+    userLatitude: number,
+    userLongitude: number,
+    page: number,
+  ): Promise<any> {
+    const pageSize = DEFAULT_PAGE_SIZE;
+    const skip = (page - 1) * pageSize;
+
+    const recommendCakes = await this.storeModel.aggregate([
+      {
+        $sort: {
+          popularity: -1,
+        },
+      },
+      {
+        $limit: 100,
+      },
+      {
+        $lookup: {
+          from: 'cakes',
+          localField: '_id',
+          foreignField: 'storeId',
+          as: 'cake',
+        },
+      },
+      {
+        $addFields: {
+          cake: { $arrayElemAt: ['$cake', 0] },
+        },
+      },
+      {
+        $lookup: {
+          from: 'cakeLikes',
+          localField: 'cake._id',
+          foreignField: 'cakeId',
+          as: 'cakeLikes',
+        },
+      },
+      {
+        $skip: skip,
+      },
+      {
+        $limit: pageSize,
+      },
+      {
+        $addFields: {
+          distance: calculateDistance(
+            userLatitude,
+            userLongitude,
+            '$latitude',
+            '$longitude',
+          ),
+        },
+      },
+      {
+        $sort: {
+          [sortCriteria]: sortCriteria === 'distance' ? 1 : -1,
+          createdDate: -1,
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          id: '$cake._id',
+          photo: { $arrayElemAt: ['$cake.photos', 0] },
+          isLiked: {
+            $in: [new ObjectId(uid), '$cakeLikes.userId'],
+          },
+        },
+      },
+    ]);
+
+    return recommendCakes;
   }
 }
