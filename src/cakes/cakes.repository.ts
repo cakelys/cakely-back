@@ -439,17 +439,27 @@ export class CakesRepository {
   }
 
   async getWorldCupCakesData(): Promise<any> {
+    const adminUserIds = [
+      new ObjectId(process.env.ADMIN_USER_ID),
+      new ObjectId(process.env.ADMIN_USER_ID_2),
+    ];
+
     const worldCupCakes = await this.cakeModel.aggregate([
-      {
-        $sample: { size: 8 },
-      },
       {
         $lookup: {
           from: 'cakeLikes',
           localField: '_id',
           foreignField: 'cakeId',
-          as: 'likes',
+          as: 'cakeLikes',
         },
+      },
+      {
+        $match: {
+          'cakeLikes.userId': { $in: adminUserIds },
+        },
+      },
+      {
+        $sample: { size: 8 },
       },
       {
         $project: {
