@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { setSortCriteria } from 'src/utils/validation-utils';
 import { StoresRepository } from './stores.repository';
 import { S3Service } from 'src/s3/s3.service';
-import { CreateStoreDto } from './dto/create-store.dto';
 
 @Injectable()
 export class StoresService {
@@ -109,10 +108,6 @@ export class StoresService {
     return storeCakes;
   }
 
-  async getStoreAllCakes(storeId: string) {
-    return this.storesRepository.getStoreAllCakes(storeId);
-  }
-
   async getStoreCake(
     uid: string,
     storeId: string,
@@ -214,20 +209,7 @@ export class StoresService {
     return nearbyStores;
   }
 
-  async createStore(createStoreDto: CreateStoreDto) {
-    createStoreDto['logo'] = `${createStoreDto.instarId}/logo.png`;
-    return this.storesRepository.createStore(createStoreDto);
-  }
-
   async searchStores(keyword: string) {
     return this.storesRepository.searchStores(keyword);
-  }
-
-  async getOldestStores() {
-    return this.storesRepository.getOldestStores();
-  }
-
-  async deleteStores(storeIds: string[]) {
-    return this.storesRepository.deleteStores(storeIds);
   }
 }

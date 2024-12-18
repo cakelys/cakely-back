@@ -1,13 +1,8 @@
 import { PendingS3Deletion } from './../s3/entities/pendingS3Deletion.entity';
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ObjectId } from 'mongodb';
 import { Model } from 'mongoose';
-import { CreateStoreDto } from './dto/create-store.dto';
 import calculateDistance from 'src/utils/distance-query-utils';
 import { Store } from './entities/store.entity';
 import { Cake } from 'src/cakes/entities/cake.entity';
@@ -325,68 +320,6 @@ export class StoresRepository {
     ]);
 
     return storeCakes;
-  }
-
-  async getStoreAllCakes(storeId: string) {
-    const allCakes = await this.storeModel.aggregate([
-      {
-        $match: {
-          _id: new ObjectId(storeId),
-        },
-      },
-      {
-        $lookup: {
-          from: 'cakes',
-          localField: '_id',
-          foreignField: 'storeId',
-          as: 'cakes',
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          store: {
-            id: '$_id',
-            name: '$name',
-            instarId: '$instarId',
-            address: '$address',
-            latitude: '$latitude',
-            longitude: '$longitude',
-            logo: '$logo',
-            info: '$info',
-            siteUrl: '$siteUrl',
-            sizes: '$sizes',
-            shapes: '$shapes',
-            popularity: '$popularity',
-            createdDate: '$createdDate',
-            isChecked: '$isChecked',
-          },
-          cakes: {
-            $map: {
-              input: {
-                $sortArray: {
-                  input: '$cakes',
-                  sortBy: { createdDate: -1 },
-                },
-              },
-              as: 'cake',
-              in: {
-                id: '$$cake._id',
-                photos: '$$cake.photos',
-                categories: '$$cake.categories',
-                popularity: '$$cake.popularity',
-              },
-            },
-          },
-        },
-      },
-    ]);
-
-    if (allCakes.length <= 0) {
-      throw new NotFoundException('해당 스토어의 케이크를 찾을 수 없습니다.');
-    }
-
-    return allCakes[0];
   }
 
   async getStoreCake(
@@ -714,19 +647,6 @@ export class StoresRepository {
     return nearbyStores;
   }
 
-  async createStore(createStoreDto: CreateStoreDto) {
-    const existingStore = await this.storeModel.findOne({
-      instarId: createStoreDto.instarId,
-    });
-
-    if (existingStore) {
-      throw new ConflictException('이미 존재하는 스토어입니다.');
-    }
-
-    const newStore = new this.storeModel(createStoreDto);
-    return newStore.save();
-  }
-
   async searchStores(keyword: string) {
     const stores = await this.storeModel.aggregate([
       {
@@ -750,96 +670,6 @@ export class StoresRepository {
     ]);
 
     return stores;
-  }
-
-  async getOldestStores() {
-    const oldestStores = await this.storeModel.aggregate([
-      {
-        $match: {
-          isChecked: false,
-        },
-      },
-      {
-        $sort: {
-          createdDate: 1,
-        },
-      },
-      {
-        $limit: 18,
-      },
-      {
-        $project: {
-          _id: 0,
-          id: '$_id',
-          name: 1,
-          address: 1,
-          logo: 1,
-        },
-      },
-    ]);
-
-    return oldestStores;
-  }
-
-  async deleteStores(storeIds: string[]): Promise<any> {
-    const session = await this.storeModel.startSession();
-    session.startTransaction();
-
-    try {
-      const storeObjectIds = storeIds.map((storeId) => new ObjectId(storeId));
-
-      const deletedStores = await this.storeModel
-        .find({ _id: { $in: storeObjectIds } })
-        .session(session);
-
-      if (deletedStores.length !== storeIds.length) {
-        throw new NotFoundException('해당 스토어를 찾을 수 없습니다.');
-      }
-
-      await this.storeModel.deleteMany(
-        { _id: { $in: storeObjectIds } },
-        { session },
-      );
-
-      const pendingS3Deletions = deletedStores.map((store) => {
-        return {
-          s3Key: store.instarId,
-        };
-      });
-
-      await this.pendingS3DeletionModel.insertMany(pendingS3Deletions, {
-        session,
-      });
-
-      const cakeIds = await this.cakeModel
-        .find({
-          storeId: { $in: storeObjectIds },
-        })
-        .distinct('_id');
-
-      await this.cakeLikeModel.deleteMany(
-        { cakeId: { $in: cakeIds } },
-        { session },
-      );
-
-      await this.cakeModel.deleteMany(
-        { storeId: { $in: storeObjectIds } },
-        { session },
-      );
-
-      await this.storeLikeModel.deleteMany(
-        { storeId: { $in: storeObjectIds } },
-        { session },
-      );
-
-      await session.commitTransaction();
-      return deletedStores;
-    } catch (error) {
-      await session.abortTransaction();
-      throw error;
-    } finally {
-      session.endSession();
-    }
   }
 
   async getRecommendCakes(

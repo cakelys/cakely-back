@@ -1,10 +1,7 @@
 import {
-  Body,
   Controller,
-  Delete,
   Get,
   Param,
-  Post,
   Query,
   Req,
   UseGuards,
@@ -75,11 +72,6 @@ export class StoresController {
     return this.storesService.searchStores(keyword);
   }
 
-  @Get('oldest')
-  getOldestStores() {
-    return this.storesService.getOldestStores();
-  }
-
   @UseGuards(AuthGuard)
   @Get(':storeId')
   getStore(@Param('storeId') storeId: string, @Req() request) {
@@ -97,11 +89,6 @@ export class StoresController {
     const uid = request.userId;
     validateRequiredField('page', page);
     return this.storesService.getStoreCakes(uid, storeId, page);
-  }
-
-  @Get(':storeId/all-cakes')
-  getStoreAllCakes(@Param('storeId') storeId: string) {
-    return this.storesService.getStoreAllCakes(storeId);
   }
 
   @UseGuards(AuthGuard)
@@ -145,15 +132,5 @@ export class StoresController {
       );
     }
     return this.storesService.getStoreDetails(uid, storeId);
-  }
-
-  @Post()
-  createStore(@Body() body: any) {
-    return this.storesService.createStore(body);
-  }
-
-  @Delete('')
-  deleteStores(@Body('storeIds') storeIds: string[]) {
-    return this.storesService.deleteStores(storeIds);
   }
 }
