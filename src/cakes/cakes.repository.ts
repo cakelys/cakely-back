@@ -4,7 +4,6 @@ import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { Store } from 'src/stores/entities/store.entity';
 import { Cake } from './entities/cake.entity';
-import { CreateCakeDto } from './dto/create-cake.dto';
 import calculateDistance from 'src/utils/distance-query-utils';
 import { CakeLike } from 'src/likes/entities/cakeLike.entity';
 import { PendingS3Deletion } from 'src/s3/entities/pendingS3Deletion.entity';
@@ -415,29 +414,6 @@ export class CakesRepository {
     return categoriesWithPhotos;
   }
 
-  async createCake(createCakeDto: CreateCakeDto) {
-    const storeInstarId = createCakeDto['storeInstarId'];
-    const store = await this.storeModel.findOne({ instarId: storeInstarId });
-
-    if (!store) {
-      throw new NotFoundException('가게를 찾을 수 없습니다.');
-    }
-
-    createCakeDto['storeId'] = store._id;
-    const photoParts = createCakeDto.photo.split('_');
-    const lastPart = photoParts[photoParts.length - 1];
-    const createdTimeStamp = Number(lastPart.replace('.png', ''));
-
-    if (isNaN(createdTimeStamp)) {
-      throw new NotFoundException('잘못된 파일명입니다.');
-    }
-
-    createCakeDto['createdDate'] = new Date(createdTimeStamp);
-
-    const newCake = await this.cakeModel.create(createCakeDto);
-    return newCake;
-  }
-
   async getWorldCupCakesData(): Promise<any> {
     const adminUserIds = [
       new ObjectId(process.env.ADMIN_USER_ID),
@@ -529,49 +505,5 @@ export class CakesRepository {
     ]);
 
     return worldCupWinner[0];
-  }
-
-  async deleteCakes(cakeIds: string[]) {
-    const session = await this.storeModel.startSession();
-    session.startTransaction();
-
-    try {
-      const cakeObjectIds = cakeIds.map((cakeId) => new ObjectId(cakeId));
-
-      const deletedCakes = await this.cakeModel
-        .find({ _id: { $in: cakeObjectIds } })
-        .session(session);
-
-      if (deletedCakes.length !== cakeIds.length) {
-        throw new NotFoundException('해당 케이크를 찾을 수 없습니다.');
-      }
-
-      await this.cakeModel.deleteMany(
-        { _id: { $in: cakeObjectIds } },
-        { session },
-      );
-
-      await this.cakeLikeModel.deleteMany(
-        { cakeId: { $in: cakeObjectIds } },
-        { session },
-      );
-
-      const pendingS3Deletions = deletedCakes.flatMap((cake) => {
-        return cake.photos.map((photo) => ({
-          s3Key: photo,
-        }));
-      });
-
-      await this.pendingS3DeletionModel.insertMany(pendingS3Deletions, {
-        session,
-      });
-
-      await session.commitTransaction();
-    } catch (error) {
-      await session.abortTransaction();
-      throw error;
-    } finally {
-      session.endSession();
-    }
   }
 }

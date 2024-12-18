@@ -5,7 +5,6 @@ import {
   Query,
   Body,
   Post,
-  Delete,
   UseGuards,
   Req,
   VERSION_NEUTRAL,
@@ -17,7 +16,6 @@ import {
   validateRequiredField,
   validateSortBy,
 } from 'src/utils/validation-utils';
-import { CreateCakeDto } from './dto/create-cake.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller({ path: 'cakes', version: ['1', VERSION_NEUTRAL] })
@@ -110,11 +108,6 @@ export class CakesController {
     );
   }
 
-  @Post()
-  createCake(@Body() createCakeDto: CreateCakeDto) {
-    return this.cakesService.createCake(createCakeDto);
-  }
-
   @UseGuards(AuthGuard)
   @Post('list')
   getCakesByIdList(@Body('cakeIds') cakeIds: string[], @Req() request) {
@@ -152,10 +145,5 @@ export class CakesController {
       return this.cakesService.getCakeById(uid, cakeId, latitude, longitude);
     }
     return this.cakesService.getCakeById(uid, cakeId);
-  }
-
-  @Delete()
-  async deleteCakes(@Body('cakeIds') cakeIds: string[]) {
-    return this.cakesService.deleteCakes(cakeIds);
   }
 }
