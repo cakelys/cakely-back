@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { CakesRepository } from './cakes.repository';
 import { setSortCriteria } from 'src/utils/validation-utils';
 import { S3Service } from 'src/s3/s3.service';
-import { CreateCakeDto } from './dto/create-cake.dto';
 import * as crypto from 'crypto';
 import { StoresRepository } from 'src/stores/stores.repository';
 
@@ -213,17 +212,6 @@ export class CakesService {
     return categories;
   }
 
-  async createCake(createCakeDto: CreateCakeDto) {
-    const storeInstarId = createCakeDto.photo.split('/')[0];
-    const photos = [createCakeDto.photo];
-
-    createCakeDto['photos'] = photos;
-    createCakeDto['storeInstarId'] = storeInstarId;
-
-    const newCake = await this.cakesRepository.createCake(createCakeDto);
-    return newCake;
-  }
-
   async getWorldCupCakes() {
     const worldCupCakes = await this.cakesRepository.getWorldCupCakesData();
 
@@ -254,9 +242,5 @@ export class CakesService {
         worldCupWinner.store.logo,
       );
     return worldCupWinner;
-  }
-
-  async deleteCakes(cakeIds: string[]) {
-    await this.cakesRepository.deleteCakes(cakeIds);
   }
 }
