@@ -1,6 +1,7 @@
 import { SchemaFactory, Schema, Prop } from '@nestjs/mongoose';
 import { ObjectId } from 'mongodb';
 import { Document } from 'mongoose';
+import { Location, LocationSchema } from 'src/common/location.entity';
 
 @Schema({
   collection: 'users',
@@ -39,6 +40,9 @@ export class User extends Document {
 
   @Prop({ type: Date, default: Date.now })
   lastLoginDate: Date;
+
+  @Prop({ type: LocationSchema })
+  location: Location;
 }
 
 export const UsersSchema = SchemaFactory.createForClass(User);
