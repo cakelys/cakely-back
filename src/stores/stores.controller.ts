@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Param,
+  ParseIntPipe,
   Query,
   Req,
   UseGuards,
@@ -67,9 +68,25 @@ export class StoresController {
     return this.storesService.getNearbyStores(uid, latitude, longitude);
   }
 
+  @UseGuards(AuthGuard)
   @Get('search')
-  searchStores(@Query('keyword') keyword: string) {
-    return this.storesService.searchStores(keyword);
+  searchStores(
+    @Query('keyword') keyword: string,
+    @Query('latitude') latitude: string,
+    @Query('longitude') longitude: string,
+    @Query('page', ParseIntPipe) page: number,
+    @Req() request,
+  ) {
+    const uid = request.userId;
+    // validateCoordinates(latitude, longitude);
+
+    return this.storesService.searchStores(
+      uid,
+      latitude,
+      longitude,
+      keyword,
+      page,
+    );
   }
 
   @UseGuards(AuthGuard)

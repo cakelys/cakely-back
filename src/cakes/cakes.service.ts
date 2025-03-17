@@ -16,21 +16,20 @@ export class CakesService {
   async getRecommendCakes(
     uid: string,
     sortBY: string,
-    page: string,
+    page: number,
     userLatitude?: string,
     userLongitude?: string,
   ) {
     const sortCriteria = setSortCriteria(sortBY);
     const userLatitudeNumber = parseFloat(userLatitude);
     const userLongitudeNumber = parseFloat(userLongitude);
-    const pageInt = parseInt(page, 10);
 
     const recommendedCakes = await this.storesRepository.getRecommendCakes(
       uid,
       sortCriteria,
       userLatitudeNumber,
       userLongitudeNumber,
-      pageInt,
+      page,
     );
 
     for (const recommendedCake of recommendedCakes) {

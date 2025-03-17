@@ -93,44 +93,6 @@ export class StoresRepository {
       { $limit: pageSize },
     ]);
 
-    for (const storeInfo of stores) {
-      const popularCakes = await this.cakeModel.aggregate([
-        {
-          $match: {
-            storeId: storeInfo.store.id,
-          },
-        },
-        {
-          $lookup: {
-            from: 'cakeLikes',
-            localField: '_id',
-            foreignField: 'cakeId',
-            as: 'cakeLikes',
-          },
-        },
-        {
-          $project: {
-            _id: 0,
-            id: '$_id',
-            photo: { $arrayElemAt: ['$photos', 0] },
-            isLiked: {
-              $in: [new ObjectId(uid), '$cakeLikes.userId'],
-            },
-          },
-        },
-        {
-          $sort: {
-            popularity: -1,
-            createdDate: -1,
-          },
-        },
-        {
-          $limit: 10,
-        },
-      ]);
-      storeInfo.popularCakes = popularCakes;
-    }
-
     return stores;
   }
 
@@ -647,7 +609,16 @@ export class StoresRepository {
     return nearbyStores;
   }
 
-  async searchStores(keyword: string) {
+  async searchStores(
+    uid: string,
+    userLatitude: number,
+    userLongitude: number,
+    keyword: string,
+    page: number,
+  ) {
+    const pageSize: number = DEFAULT_PAGE_SIZE;
+    const skip: number = (page - 1) * pageSize;
+
     const stores = await this.storeModel.aggregate([
       {
         $match: {
@@ -658,6 +629,36 @@ export class StoresRepository {
         },
       },
       {
+        $lookup: {
+          from: 'storeLikes',
+          localField: '_id',
+          foreignField: 'storeId',
+          as: 'storeLikes',
+        },
+      },
+      {
+        $addFields: {
+          isLiked: {
+            $in: [
+              new ObjectId(uid),
+              {
+                $map: { input: '$storeLikes', as: 'like', in: '$$like.userId' },
+              },
+            ],
+          },
+        },
+      },
+      {
+        $addFields: {
+          distance: calculateDistance(
+            userLatitude,
+            userLongitude,
+            '$latitude',
+            '$longitude',
+          ),
+        },
+      },
+      {
         $project: {
           _id: 0,
           id: '$_id',
@@ -665,8 +666,11 @@ export class StoresRepository {
           address: 1,
           logo: 1,
           isChecked: 1,
+          distance: 1,
         },
       },
+      { $skip: skip },
+      { $limit: pageSize },
     ]);
 
     return stores;

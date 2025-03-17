@@ -1,3 +1,4 @@
+import { CakesRepository } from './../cakes/cakes.repository';
 import { Injectable } from '@nestjs/common';
 import { setSortCriteria } from 'src/utils/validation-utils';
 import { StoresRepository } from './stores.repository';
@@ -8,6 +9,7 @@ export class StoresService {
   constructor(
     private readonly storesRepository: StoresRepository,
     private readonly s3Service: S3Service,
+    private readonly cakesRepository: CakesRepository,
   ) {}
 
   async getAllStores(
@@ -31,6 +33,12 @@ export class StoresService {
     );
 
     for (const storeData of allStores) {
+      const popularCakes = await this.cakesRepository.getPopularCakesInStore(
+        uid,
+        storeData.store.id,
+      );
+      storeData.popularCakes = popularCakes;
+
       storeData.store.logo = await this.s3Service.generagePresignedDownloadUrl(
         process.env.S3_RESIZED_BUCKET_NAME,
         storeData.store.logo,
@@ -209,7 +217,32 @@ export class StoresService {
     return nearbyStores;
   }
 
-  async searchStores(keyword: string) {
-    return this.storesRepository.searchStores(keyword);
+  async searchStores(
+    uid: string,
+    latitude: string,
+    longitude: string,
+    keyword: string,
+    page: number,
+  ) {
+    const userLatitude = parseFloat(latitude);
+    const userLongitude = parseFloat(longitude);
+
+    const stores = await this.storesRepository.searchStores(
+      uid,
+      userLatitude,
+      userLongitude,
+      keyword,
+      page,
+    );
+
+    for (const storeInfo of stores) {
+      const popularCakes = await this.cakesRepository.getPopularCakesInStore(
+        uid,
+        storeInfo.id,
+      );
+      storeInfo.popularCakes = popularCakes;
+    }
+
+    return stores;
   }
 }

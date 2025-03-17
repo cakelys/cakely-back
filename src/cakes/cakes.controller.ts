@@ -8,6 +8,7 @@ import {
   UseGuards,
   Req,
   VERSION_NEUTRAL,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CakesService } from './cakes.service';
 import {
@@ -26,10 +27,10 @@ export class CakesController {
   @Get('recommend')
   getRecommendCakes(
     @Query('sortBy') sortBy: string,
-    @Query('latitude') latitude: string,
-    @Query('longitude') longitude: string,
-    @Query('page') page: string,
-    @Req() request,
+    @Query('page', ParseIntPipe) page: number,
+    @Req() request: { userId: string },
+    @Query('latitude') latitude?: string,
+    @Query('longitude') longitude?: string,
   ) {
     const uid = request.userId;
 

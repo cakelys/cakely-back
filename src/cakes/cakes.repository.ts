@@ -8,6 +8,7 @@ import calculateDistance from 'src/utils/distance-query-utils';
 import { CakeLike } from 'src/likes/entities/cakeLike.entity';
 import { PendingS3Deletion } from 'src/s3/entities/pendingS3Deletion.entity';
 import { DEFAULT_PAGE_SIZE } from 'src/utils/constants';
+import { CakeDto } from './dto/cake.dto';
 
 @Injectable()
 export class CakesRepository {
@@ -505,5 +506,45 @@ export class CakesRepository {
     ]);
 
     return worldCupWinner[0];
+  }
+
+  async getPopularCakesInStore(
+    uid: string,
+    storeId: string,
+  ): Promise<CakeDto[]> {
+    return this.cakeModel.aggregate([
+      {
+        $match: {
+          storeId: storeId,
+        },
+      },
+      {
+        $lookup: {
+          from: 'cakeLikes',
+          localField: '_id',
+          foreignField: 'cakeId',
+          as: 'cakeLikes',
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          id: '$_id',
+          photo: { $arrayElemAt: ['$photos', 0] },
+          isLiked: {
+            $in: [new ObjectId(uid), '$cakeLikes.userId'],
+          },
+        },
+      },
+      {
+        $sort: {
+          popularity: -1,
+          createdDate: -1,
+        },
+      },
+      {
+        $limit: 10,
+      },
+    ]);
   }
 }
