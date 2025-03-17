@@ -2,23 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
-import { Store } from 'src/stores/entities/store.entity';
 import { Cake } from './entities/cake.entity';
 import calculateDistance from 'src/utils/distance-query-utils';
-import { CakeLike } from 'src/likes/entities/cakeLike.entity';
-import { PendingS3Deletion } from 'src/s3/entities/pendingS3Deletion.entity';
 import { DEFAULT_PAGE_SIZE } from 'src/utils/constants';
 import { CakeDto } from './dto/cake.dto';
 
 @Injectable()
 export class CakesRepository {
-  constructor(
-    @InjectModel('Cake') private readonly cakeModel: Model<Cake>,
-    @InjectModel('Store') private readonly storeModel: Model<Store>,
-    @InjectModel('CakeLike') private readonly cakeLikeModel: Model<CakeLike>,
-    @InjectModel('PendingS3Deletion')
-    private readonly pendingS3DeletionModel: Model<PendingS3Deletion>,
-  ) {}
+  constructor(@InjectModel('Cake') private readonly cakeModel: Model<Cake>) {}
 
   async getTodayCakesData(uid: string, dateSeed: string): Promise<any> {
     const adminUserIds = [

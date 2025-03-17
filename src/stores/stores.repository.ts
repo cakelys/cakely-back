@@ -1,4 +1,3 @@
-import { PendingS3Deletion } from './../s3/entities/pendingS3Deletion.entity';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ObjectId } from 'mongodb';
@@ -6,8 +5,6 @@ import { Model } from 'mongoose';
 import calculateDistance from 'src/utils/distance-query-utils';
 import { Store } from './entities/store.entity';
 import { Cake } from 'src/cakes/entities/cake.entity';
-import { StoreLike } from 'src/likes/entities/storeLike.entity';
-import { CakeLike } from 'src/likes/entities/cakeLike.entity';
 import { DEFAULT_PAGE_SIZE } from 'src/utils/constants';
 
 @Injectable()
@@ -15,10 +12,6 @@ export class StoresRepository {
   constructor(
     @InjectModel('Store') private readonly storeModel: Model<Store>,
     @InjectModel('Cake') private readonly cakeModel: Model<Cake>,
-    @InjectModel('StoreLike') private readonly storeLikeModel: Model<StoreLike>,
-    @InjectModel('CakeLike') private readonly cakeLikeModel: Model<CakeLike>,
-    @InjectModel('PendingS3Deletion')
-    private readonly pendingS3DeletionModel: Model<PendingS3Deletion>,
   ) {}
 
   async getAllStores(
