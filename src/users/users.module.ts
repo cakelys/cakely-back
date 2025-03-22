@@ -6,12 +6,19 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { User, UsersSchema } from './entities/user.entity';
 import { FirebaseService } from 'src/auth/firebase.service';
 import { S3Service } from 'src/s3/s3.service';
+import { KakaoMapClient } from 'src/clients/kakao.map.client';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UsersSchema }]),
   ],
   controllers: [UsersController],
-  providers: [UsersService, UsersRepository, FirebaseService, S3Service],
+  providers: [
+    UsersService,
+    UsersRepository,
+    FirebaseService,
+    S3Service,
+    KakaoMapClient,
+  ],
 })
 export class UsersModule {}

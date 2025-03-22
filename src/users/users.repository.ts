@@ -10,8 +10,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { FirebaseService } from 'src/auth/firebase.service';
 import { User } from './entities/user.entity';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { ObjectId } from 'mongodb';
+import { UpdateUserDbDto } from './dto/update-user-db.dto';
 
 @Injectable()
 export class UsersRepository {
@@ -111,14 +111,10 @@ export class UsersRepository {
     await newUser.save();
   }
 
-  async updateUserInfo(uid: string, updateUserDto: UpdateUserDto) {
-    if (updateUserDto.status === '탈퇴') {
-      updateUserDto.deletedDate = new Date();
-    }
-
+  async updateUserInfo(uid: string, updateUserDbDto: UpdateUserDbDto) {
     const userInfo = await this.userModel.findOneAndUpdate(
       { _id: new ObjectId(uid) },
-      updateUserDto,
+      updateUserDbDto,
       { new: true },
     );
     if (!userInfo) {

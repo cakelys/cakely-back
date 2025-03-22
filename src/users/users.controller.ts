@@ -15,12 +15,14 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { S3Service } from 'src/s3/s3.service';
+import { KakaoMapClient } from 'src/clients/kakao.map.client';
 
 @Controller({ path: 'users', version: ['1', VERSION_NEUTRAL] })
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly s3Service: S3Service,
+    private readonly kakaoMapClient: KakaoMapClient,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -61,6 +63,19 @@ export class UsersController {
       );
       updateUserDto.photo = photoUrl;
     }
+
+    if (
+      updateUserDto.latitude &&
+      updateUserDto.longitude &&
+      !updateUserDto.address
+    ) {
+      updateUserDto.address =
+        await this.kakaoMapClient.convertCoordinatesToAddress(
+          updateUserDto.latitude,
+          updateUserDto.longitude,
+        );
+    }
+
     await this.usersService.updateUserInfo(uid, updateUserDto);
   }
 }
