@@ -121,4 +121,20 @@ export class UsersRepository {
       throw new NotFoundException('User not found');
     }
   }
+
+  async getUserLocation(uid: string) {
+    const userLocation = await this.userModel.findOne(
+      {
+        _id: new ObjectId(uid),
+      },
+      {
+        _id: 0,
+        address: 1,
+        latitude: { $arrayElemAt: ['$location.coordinates', 1] },
+        longitude: { $arrayElemAt: ['$location.coordinates', 0] },
+      },
+    );
+
+    return userLocation;
+  }
 }

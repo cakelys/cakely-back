@@ -78,4 +78,11 @@ export class UsersController {
 
     await this.usersService.updateUserInfo(uid, updateUserDto);
   }
+
+  @UseGuards(AuthGuard)
+  @Get('my/location')
+  async getUserLocation(@Req() request) {
+    const uid = request.userId;
+    return this.usersService.getUserLocation(uid);
+  }
 }

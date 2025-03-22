@@ -23,4 +23,8 @@ export class UsersService {
     const updateUserDbDto: UpdateUserDbDto = new UpdateUserDbDto(updateUser);
     this.usersRepository.updateUserInfo(uid, updateUserDbDto);
   }
+
+  async getUserLocation(uid: string) {
+    return this.usersRepository.getUserLocation(uid);
+  }
 }
