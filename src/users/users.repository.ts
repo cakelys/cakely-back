@@ -31,6 +31,9 @@ export class UsersRepository {
         profileImage: 1,
         pushNotification: 1,
         photo: 1,
+        latitude: { $arrayElemAt: ['$location.coordinates', 1] },
+        longitude: { $arrayElemAt: ['$location.coordinates', 0] },
+        address: 1,
       },
     );
 

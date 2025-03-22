@@ -27,7 +27,7 @@ export class StoresController {
     @Query('sortBy') sortBy: string,
     @Query('latitude') latitude: string,
     @Query('longitude') longitude: string,
-    @Query('page') page: string,
+    @Query('page', ParseIntPipe) page: number,
     @Req() request,
   ) {
     const uid = request.userId;

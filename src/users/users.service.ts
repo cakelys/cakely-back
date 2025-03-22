@@ -6,8 +6,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UsersService {
   constructor(private readonly usersRepository: UsersRepository) {}
   async getUserInfo(uid: string) {
-    const userInfo = await this.usersRepository.getUserInfo(uid);
-    return userInfo;
+    const user = await this.usersRepository.getUserInfo(uid);
+    return user;
   }
 
   async logIn(uid: string) {

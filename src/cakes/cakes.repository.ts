@@ -5,7 +5,6 @@ import { ObjectId } from 'mongodb';
 import { Cake } from './entities/cake.entity';
 import calculateDistance from 'src/utils/distance-query-utils';
 import { DEFAULT_PAGE_SIZE } from 'src/utils/constants';
-import { CakeDto } from './dto/cake.dto';
 
 @Injectable()
 export class CakesRepository {
@@ -499,10 +498,7 @@ export class CakesRepository {
     return worldCupWinner[0];
   }
 
-  async getPopularCakesInStore(
-    uid: string,
-    storeId: string,
-  ): Promise<CakeDto[]> {
+  async getPopularCakesInStore(uid: string, storeId: string) {
     return this.cakeModel.aggregate([
       {
         $match: {

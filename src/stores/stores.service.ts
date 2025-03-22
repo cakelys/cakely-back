@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { setSortCriteria } from 'src/utils/validation-utils';
 import { StoresRepository } from './stores.repository';
 import { S3Service } from 'src/s3/s3.service';
+import { CakeDto } from 'src/cakes/dto/cake.dto';
 
 @Injectable()
 export class StoresService {
@@ -15,28 +16,28 @@ export class StoresService {
   async getAllStores(
     uid: string,
     sortBy: string,
-    page: string,
+    page: number,
     userLatitude?: string,
     userLongitude?: string,
   ) {
     const sortCriteria = setSortCriteria(sortBy);
     const userLatitudeNumber = parseFloat(userLatitude);
     const userLongitudeNumber = parseFloat(userLongitude);
-    const pageInt = parseInt(page, 10);
 
     const allStores = await this.storesRepository.getAllStores(
       uid,
       sortCriteria,
       userLatitudeNumber,
       userLongitudeNumber,
-      pageInt,
+      page,
     );
 
     for (const storeData of allStores) {
-      const popularCakes = await this.cakesRepository.getPopularCakesInStore(
-        uid,
-        storeData.store.id,
-      );
+      const popularCakes: CakeDto[] =
+        await this.cakesRepository.getPopularCakesInStore(
+          uid,
+          storeData.store.id,
+        ); // [TODO] CakeDto 생성해서 사용하도록 변경
       storeData.popularCakes = popularCakes;
 
       storeData.store.logo = await this.s3Service.generagePresignedDownloadUrl(
@@ -236,10 +237,8 @@ export class StoresService {
     );
 
     for (const storeInfo of stores) {
-      const popularCakes = await this.cakesRepository.getPopularCakesInStore(
-        uid,
-        storeInfo.id,
-      );
+      const popularCakes: CakeDto[] =
+        await this.cakesRepository.getPopularCakesInStore(uid, storeInfo.id); // [TODO] CakeDto 생성해서 사용하도록 변경
       storeInfo.popularCakes = popularCakes;
     }
 

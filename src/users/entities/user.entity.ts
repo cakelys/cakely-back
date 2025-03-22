@@ -41,8 +41,11 @@ export class User extends Document {
   @Prop({ type: Date, default: Date.now })
   lastLoginDate: Date;
 
-  @Prop({ type: LocationSchema })
+  @Prop({ type: LocationSchema, default: {} })
   location: Location;
+
+  @Prop({ type: String, default: '' })
+  address: string;
 }
 
 export const UsersSchema = SchemaFactory.createForClass(User);
