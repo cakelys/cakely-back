@@ -3,11 +3,11 @@ import { AppAvailability } from './utils/app-availability.enum';
 
 @Injectable()
 export class AppService {
-  getAppStatus(
+  async getAppStatus(
     os: string,
     version: string,
     serverStatus: AppAvailability,
-  ): { availability: number } {
+  ): Promise<{ availability: number }> {
     const validOsList = ['ios', 'android'];
 
     const isOsValid = validOsList.includes(os);

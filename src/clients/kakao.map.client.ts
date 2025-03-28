@@ -6,7 +6,10 @@ export class KakaoMapClient {
   async convertCoordinatesToAddress(
     latitude: number,
     longitude: number,
-  ): Promise<string> {
+  ): Promise<{
+    road_address: string;
+    address: string;
+  } | null> {
     const url = `https://dapi.kakao.com/v2/local/geo/coord2address.json?x=${longitude}&y=${latitude}&input_coord=WGS84`;
     const response = await axios.get(url, {
       headers: {
@@ -15,10 +18,14 @@ export class KakaoMapClient {
     });
 
     try {
+      const road_address = response.data.documents[0].road_address.address_name;
       const address = response.data.documents[0].address.address_name;
-      return address;
+      return {
+        road_address,
+        address,
+      };
     } catch (e) {
-      return '';
+      return null;
     }
   }
 

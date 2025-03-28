@@ -70,11 +70,12 @@ export class UsersController {
       updateUserDto.longitude &&
       !updateUserDto.address
     ) {
-      updateUserDto.address =
+      const { road_address, address: _ } =
         await this.kakaoMapClient.convertCoordinatesToAddress(
           updateUserDto.latitude,
           updateUserDto.longitude,
         );
+      updateUserDto.address = road_address;
     } else if (updateUserDto.address) {
       const result = await this.kakaoMapClient.convertAddressToCoordinates(
         updateUserDto.address,
