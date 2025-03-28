@@ -21,4 +21,26 @@ export class KakaoMapClient {
       return '';
     }
   }
+
+  async convertAddressToCoordinates(
+    address: string,
+  ): Promise<{ latitude: number; longitude: number | null }> {
+    const url = `https://dapi.kakao.com/v2/local/search/address.json`;
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `KakaoAK ${process.env.KAKAO_API_KEY}`,
+      },
+      params: {
+        query: address,
+      },
+    });
+
+    try {
+      const latitude = parseFloat(response.data.documents[0].y);
+      const longitude = parseFloat(response.data.documents[0].x);
+      return { latitude, longitude };
+    } catch (e) {
+      return null;
+    }
+  }
 }

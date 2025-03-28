@@ -3,6 +3,7 @@ export class LocationDto {
   coordinates: [number, number];
 
   constructor(latitude: number, longitude: number) {
+    this.type = 'Point';
     this.coordinates = [longitude, latitude];
   }
 }

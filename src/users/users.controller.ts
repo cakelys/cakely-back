@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -74,6 +75,19 @@ export class UsersController {
           updateUserDto.latitude,
           updateUserDto.longitude,
         );
+    } else if (updateUserDto.address) {
+      const result = await this.kakaoMapClient.convertAddressToCoordinates(
+        updateUserDto.address,
+      );
+
+      if (!result) {
+        throw new BadRequestException(
+          '주소값이 유효하지 않습니다. 다른 주소로 시도해주세요.',
+        );
+      }
+
+      updateUserDto.latitude = result.latitude;
+      updateUserDto.longitude = result.longitude;
     }
 
     await this.usersService.updateUserInfo(uid, updateUserDto);
