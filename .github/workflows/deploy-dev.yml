@@ -33,6 +33,7 @@ jobs:
           echo "LOG_LEVEL=${{ secrets.LOG_LEVEL_DEV }}" >> .env
           echo "ADMIN_USER_ID=${{ secrets.ADMIN_USER_ID }}" >> .env
           echo "ADMIN_USER_ID_2=${{ secrets.ADMIN_USER_ID_2 }}" >> .env
+          echo "KAKAO_API_KEY=${{ secrets.KAKAO_API_KEY }}" >> .env
       - name: Display .env file
         run: cat .env
       - name: serverless deploy
