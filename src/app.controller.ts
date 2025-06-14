@@ -58,10 +58,10 @@ export class AppController {
       );
     }
 
-    const { road_address, address } = result;
+    const { roadAddress, address } = result;
 
     return {
-      road_address,
+      roadAddress,
       address,
     };
   }
