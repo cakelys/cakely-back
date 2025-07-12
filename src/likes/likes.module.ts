@@ -7,9 +7,8 @@ import { CakeLike, CakeLikeSchema } from './entities/cakeLike.entity';
 import { Cake, CakeSchema } from '../cakes/entities/cake.entity';
 import { LikesRepository } from './likes.repository';
 import { Store, StoreSchema } from 'src/stores/entities/store.entity';
-import { S3Service } from 'src/s3/s3.service';
-import { FirebaseService } from 'src/auth/firebase.service';
-import { User, UsersSchema } from 'src/users/entities/user.entity';
+import { AuthModule } from 'src/auth/auth.module';
+import { S3Module } from 'src/s3/s3.module';
 
 @Module({
   imports: [
@@ -18,10 +17,11 @@ import { User, UsersSchema } from 'src/users/entities/user.entity';
       { name: CakeLike.name, schema: CakeLikeSchema },
       { name: Cake.name, schema: CakeSchema },
       { name: Store.name, schema: StoreSchema },
-      { name: User.name, schema: UsersSchema },
     ]),
+    AuthModule,
+    S3Module,
   ],
   controllers: [LikesController],
-  providers: [LikesService, LikesRepository, S3Service, FirebaseService],
+  providers: [LikesService, LikesRepository],
 })
 export class LikesModule {}

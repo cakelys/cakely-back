@@ -9,5 +9,6 @@ import { User, UsersSchema } from 'src/users/entities/user.entity';
   ],
   controllers: [],
   providers: [FirebaseService],
+  exports: [FirebaseService],
 })
 export class AuthModule {}

@@ -10,7 +10,7 @@ import { S3Module } from './s3/s3.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { SearchModule } from './search/search.module';
-import { KakaoMapClient } from './clients/kakao.map.client';
+import { KakaoMapModule } from './clients/kakao-map/kakao-map.module';
 
 @Module({
   imports: [
@@ -27,8 +27,9 @@ import { KakaoMapClient } from './clients/kakao.map.client';
     UsersModule,
     AuthModule,
     SearchModule,
+    KakaoMapModule,
   ],
   controllers: [AppController],
-  providers: [AppService, KakaoMapClient],
+  providers: [AppService],
 })
 export class AppModule {}

@@ -16,7 +16,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { S3Service } from 'src/s3/s3.service';
-import { KakaoMapClient } from 'src/clients/kakao.map.client';
+import { KakaoMapClient } from 'src/clients/kakao-map/kakao-map.client';
 
 @Controller({ path: 'users', version: ['1', VERSION_NEUTRAL] })
 export class UsersController {

@@ -9,7 +9,7 @@ import {
 import { AppService } from './app.service';
 import { validateRequiredField } from './utils/validation-utils';
 import { AppAvailability } from './utils/app-availability.enum';
-import { KakaoMapClient } from './clients/kakao.map.client';
+import { KakaoMapClient } from './clients/kakao-map/kakao-map.client';
 import { GetAddressQueryDto } from './common/get-address-query.dto';
 
 @Controller({ version: ['1', VERSION_NEUTRAL] })
