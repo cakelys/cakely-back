@@ -5,7 +5,7 @@ import { AppAvailability } from './utils/app-availability.enum';
 describe('AppService', () => {
   let appService: AppService;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [AppService],
     }).compile();
