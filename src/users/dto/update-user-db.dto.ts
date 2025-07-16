@@ -29,5 +29,5 @@ export class UpdateUserDbDto extends PartialType(CreateUserDto) {
 
   @IsOptional()
   @IsString()
-  address: string;
+  address?: string;
 }
