@@ -13,7 +13,7 @@ describe('AppService', () => {
     appService = moduleRef.get<AppService>(AppService);
   });
 
-  describe('getAppStatus()', () => {
+  describe('getAppStatus', () => {
     it('serverStatus가 Maintenance이면 무조건 Maintenance를 반환해야 한다', async () => {
       const result = await appService.getAppStatus(
         'ios',
